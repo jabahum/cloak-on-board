@@ -1,0 +1,33 @@
+FROM golang:1.25.4-alpine AS builder
+
+WORKDIR /app
+
+RUN apk add --no-cache git ca-certificates
+
+ENV CGO_ENABLED=0
+ENV GOOS=linux
+ENV GOPROXY=https://proxy.golang.org,direct
+ENV GOSUMDB=sum.golang.org
+
+COPY go.mod go.sum ./
+
+RUN --mount=type=cache,target=/go/pkg/mod \
+  go mod download
+
+COPY . .
+
+RUN --mount=type=cache,target=/go/pkg/mod \
+  go build -trimpath -ldflags="-s -w" -o /api ./cmd/api
+
+
+FROM alpine:3.22
+
+WORKDIR /app
+
+RUN apk add --no-cache ca-certificates wget
+
+COPY --from=builder /api /app/api
+
+EXPOSE 9000
+
+CMD ["/app/api"]

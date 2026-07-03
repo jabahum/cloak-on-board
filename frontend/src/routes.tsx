@@ -1,0 +1,26 @@
+import { Navigate, Route, Routes } from "react-router-dom";
+import { AppLayout } from "./layouts/AppLayout";
+import { ApplicationCreatePage } from "./pages/applications/ApplicationCreatePage";
+import { ApplicationDetailPage } from "./pages/applications/ApplicationDetailPage";
+import { ApplicationsPage } from "./pages/applications/ApplicationsPage";
+import { DashboardPage } from "./pages/dashboard/DashboardPage";
+import { ProvisioningJobsPage } from "./pages/jobs/ProvisioningJobsPage";
+import { SettingsPage } from "./pages/settings/SettingsPage";
+import { TemplatesPage } from "./pages/templates/TemplatesPage";
+
+export function AppRoutes() {
+  return (
+    <Routes>
+      <Route element={<AppLayout />}>
+        <Route path="/" element={<Navigate to="/dashboard" replace />} />
+        <Route path="/dashboard" element={<DashboardPage />} />
+        <Route path="/applications" element={<ApplicationsPage />} />
+        <Route path="/applications/new" element={<ApplicationCreatePage />} />
+        <Route path="/applications/:id" element={<ApplicationDetailPage />} />
+        <Route path="/templates" element={<TemplatesPage />} />
+        <Route path="/jobs" element={<ProvisioningJobsPage />} />
+        <Route path="/settings" element={<SettingsPage />} />
+      </Route>
+    </Routes>
+  );
+}

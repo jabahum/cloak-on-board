@@ -1,0 +1,33 @@
+FROM node:22-bookworm-slim AS builder
+
+WORKDIR /app
+
+ARG VITE_API_BASE_URL
+ARG VITE_API_AUTH_TOKEN
+ENV VITE_API_BASE_URL=$VITE_API_BASE_URL
+ENV VITE_API_AUTH_TOKEN=$VITE_API_AUTH_TOKEN
+
+COPY package.json package-lock.json* ./
+
+RUN npm cache clean --force
+
+RUN if [ -f package-lock.json ]; then \
+  npm ci --include=optional; \
+  else \
+  npm install --include=optional; \
+  fi
+
+RUN npm install @rolldown/binding-linux-arm64-gnu --save-optional || true
+RUN npm install @rolldown/binding-linux-x64-gnu --save-optional || true
+
+COPY . .
+
+RUN npm run build
+
+FROM nginx:1.27-alpine
+
+COPY --from=builder /app/dist /usr/share/nginx/html
+
+EXPOSE 80
+
+CMD ["nginx", "-g", "daemon off;"]

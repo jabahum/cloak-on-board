@@ -1,0 +1,139 @@
+version: "3.9"
+
+services:
+  postgres:
+    image: postgres:17
+    container_name: onboarder-postgres
+    restart: unless-stopped
+
+    environment:
+      POSTGRES_DB: onboarder
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+
+    ports:
+      - "5432:5432"
+
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  keycloak-db:
+    image: postgres:17
+    container_name: keycloak-postgres
+
+    restart: unless-stopped
+
+    environment:
+      POSTGRES_DB: keycloak
+      POSTGRES_USER: keycloak
+      POSTGRES_PASSWORD: keycloak
+
+    ports:
+      - "5433:5432"
+
+    volumes:
+      - keycloak_db:/var/lib/postgresql/data
+
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U keycloak"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.2
+
+    container_name: keycloak
+
+    command: start-dev
+
+    environment:
+      KC_DB: postgres
+      KC_DB_URL_HOST: keycloak-db
+      KC_DB_URL_DATABASE: keycloak
+      KC_DB_USERNAME: keycloak
+      KC_DB_PASSWORD: keycloak
+
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+
+    depends_on:
+      keycloak-db:
+        condition: service_healthy
+
+    ports:
+      - "8080:8080"
+
+    volumes:
+      - keycloak_data:/opt/keycloak/data
+
+  migrate:
+    image: migrate/migrate:latest
+    container_name: onboarder-migrate
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ./backend/migrations:/migrations
+    command:
+      [
+        "-path",
+        "/migrations",
+        "-database",
+        "postgres://postgres:postgres@postgres:5432/onboarder?sslmode=disable",
+        "up",
+      ]
+
+  backend:
+    build:
+      context: ./backend
+
+    container_name: onboarder-api
+
+    depends_on:
+      postgres:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
+
+    environment:
+      APP_ENV: development
+      APP_PORT: 9000
+
+      DATABASE_URL: postgres://postgres:postgres@postgres:5432/onboarder?sslmode=disable
+
+      KEYCLOAK_BASE_URL: http://keycloak:8080
+      KEYCLOAK_REALM: master
+      KEYCLOAK_ADMIN_CLIENT_ID: admin-cli
+      KEYCLOAK_ADMIN_CLIENT_SECRET:
+
+    ports:
+      - "9000:9000"
+
+  frontend:
+    build:
+      context: ./frontend
+
+    container_name: onboarder-ui
+
+    depends_on:
+      - backend
+
+    environment:
+      VITE_API_BASE_URL: http://localhost:9000/api/v1
+
+    ports:
+      - "3000:5173"
+
+volumes:
+  postgres_data:
+
+  keycloak_db:
+
+  keycloak_data:

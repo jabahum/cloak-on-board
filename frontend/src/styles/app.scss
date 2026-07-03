@@ -1,0 +1,27 @@
+.app-content {
+  margin-left: 16rem;
+  padding: 2rem;
+  min-height: 100vh;
+  background: #f4f4f4;
+}
+
+.page-header {
+  margin-bottom: 1.5rem;
+}
+
+.page-title {
+  margin: 0;
+  font-size: 1.75rem;
+  font-weight: 600;
+}
+
+.page-subtitle {
+  margin-top: 0.5rem;
+  color: #6f6f6f;
+}
+
+.template-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 1rem;
+}
