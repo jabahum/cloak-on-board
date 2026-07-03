@@ -1,0 +1,247 @@
+{
+  "realm": "onboarder",
+  "enabled": true,
+  "displayName": "Keycloak Onboarder",
+  "registrationAllowed": false,
+  "loginWithEmailAllowed": true,
+  "duplicateEmailsAllowed": false,
+  "resetPasswordAllowed": true,
+  "editUsernameAllowed": false,
+  "sslRequired": "external",
+  "roles": {
+    "realm": [
+      {
+        "name": "admin",
+        "description": "Realm administrator"
+      },
+      {
+        "name": "manager",
+        "description": "Manager user"
+      },
+      {
+        "name": "viewer",
+        "description": "Read-only user"
+      }
+    ]
+  },
+  "groups": [
+    {
+      "name": "Administrators",
+      "realmRoles": ["admin"]
+    },
+    {
+      "name": "Managers",
+      "realmRoles": ["manager"]
+    },
+    {
+      "name": "Viewers",
+      "realmRoles": ["viewer"]
+    }
+  ],
+  "clients": [
+    {
+      "clientId": "onboarder-admin",
+      "name": "Onboarder Admin Service Client",
+      "description": "Service account used by Keycloak Onboarder backend",
+      "enabled": true,
+      "protocol": "openid-connect",
+      "publicClient": false,
+      "clientAuthenticatorType": "client-secret",
+      "secret": "onboarder-admin-secret",
+      "serviceAccountsEnabled": true,
+      "standardFlowEnabled": false,
+      "directAccessGrantsEnabled": false,
+      "implicitFlowEnabled": false,
+      "authorizationServicesEnabled": false,
+      "bearerOnly": false,
+      "redirectUris": [],
+      "webOrigins": []
+    },
+    {
+      "clientId": "keycloak-onboarder-ui",
+      "name": "Keycloak Onboarder UI",
+      "enabled": true,
+      "protocol": "openid-connect",
+      "publicClient": true,
+      "standardFlowEnabled": true,
+      "directAccessGrantsEnabled": false,
+      "serviceAccountsEnabled": false,
+      "redirectUris": [
+        "http://localhost:3000/*",
+        "http://localhost:5173/*",
+        "https://localhost/*"
+      ],
+      "webOrigins": [
+        "http://localhost:3000",
+        "http://localhost:5173",
+        "https://localhost"
+      ],
+      "attributes": {
+        "pkce.code.challenge.method": "S256"
+      },
+      "defaultClientScopes": ["web-origins", "profile", "email", "roles"],
+      "optionalClientScopes": ["address", "phone", "offline_access"]
+    },
+    {
+      "clientId": "health-bi",
+      "name": "Health BI Demo",
+      "enabled": true,
+      "protocol": "openid-connect",
+      "publicClient": true,
+      "standardFlowEnabled": true,
+      "directAccessGrantsEnabled": false,
+      "serviceAccountsEnabled": false,
+      "redirectUris": ["http://localhost:3000/health-bi/*"],
+      "webOrigins": ["http://localhost:3000"],
+      "attributes": {
+        "pkce.code.challenge.method": "S256"
+      },
+      "defaultClientScopes": ["web-origins", "profile", "email", "roles"],
+      "optionalClientScopes": ["offline_access"],
+      "protocolMappers": [
+        {
+          "name": "client roles",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-client-role-mapper",
+          "config": {
+            "claim.name": "resource_access.${client_id}.roles",
+            "jsonType.label": "String",
+            "multivalued": "true",
+            "access.token.claim": "true",
+            "id.token.claim": "true",
+            "userinfo.token.claim": "true"
+          }
+        },
+        {
+          "name": "realm roles",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-realm-role-mapper",
+          "config": {
+            "claim.name": "realm_access.roles",
+            "jsonType.label": "String",
+            "multivalued": "true",
+            "access.token.claim": "true",
+            "id.token.claim": "true",
+            "userinfo.token.claim": "true"
+          }
+        }
+      ],
+      "roles": {
+        "access": {
+          "description": "Can access Health BI"
+        },
+        "admin": {
+          "description": "Health BI administrator"
+        },
+        "manager": {
+          "description": "Health BI manager"
+        },
+        "viewer": {
+          "description": "Health BI viewer"
+        }
+      }
+    },
+    {
+      "clientId": "health-api",
+      "name": "Health API Demo",
+      "enabled": true,
+      "protocol": "openid-connect",
+      "publicClient": false,
+      "clientAuthenticatorType": "client-secret",
+      "secret": "health-api-secret",
+      "standardFlowEnabled": false,
+      "directAccessGrantsEnabled": false,
+      "serviceAccountsEnabled": false,
+      "bearerOnly": false,
+      "redirectUris": [],
+      "webOrigins": [],
+      "roles": {
+        "access": {
+          "description": "Can access Health API"
+        },
+        "admin": {
+          "description": "Health API administrator"
+        },
+        "viewer": {
+          "description": "Health API viewer"
+        }
+      }
+    },
+    {
+      "clientId": "analytics-worker",
+      "name": "Analytics Worker Demo",
+      "enabled": true,
+      "protocol": "openid-connect",
+      "publicClient": false,
+      "clientAuthenticatorType": "client-secret",
+      "secret": "analytics-worker-secret",
+      "standardFlowEnabled": false,
+      "directAccessGrantsEnabled": false,
+      "serviceAccountsEnabled": true,
+      "bearerOnly": false,
+      "redirectUris": [],
+      "webOrigins": [],
+      "roles": {
+        "access": {
+          "description": "Can access worker resources"
+        },
+        "service": {
+          "description": "Service account role"
+        }
+      }
+    }
+  ],
+  "users": [
+    {
+      "username": "admin",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "System",
+      "lastName": "Admin",
+      "email": "admin@example.org",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "admin123",
+          "temporary": false
+        }
+      ],
+      "realmRoles": ["admin"],
+      "groups": ["/Administrators"]
+    },
+    {
+      "username": "manager",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Demo",
+      "lastName": "Manager",
+      "email": "manager@example.org",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "manager123",
+          "temporary": false
+        }
+      ],
+      "realmRoles": ["manager"],
+      "groups": ["/Managers"]
+    },
+    {
+      "username": "viewer",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Demo",
+      "lastName": "Viewer",
+      "email": "viewer@example.org",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "viewer123",
+          "temporary": false
+        }
+      ],
+      "realmRoles": ["viewer"],
+      "groups": ["/Viewers"]
+    }
+  ]
+}
