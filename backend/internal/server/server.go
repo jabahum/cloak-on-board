@@ -31,7 +31,6 @@ func New(cfg config.Config, db *pgxpool.Pool) *Server {
 	s.router.Use(middleware.Recovery())
 	s.router.Use(middleware.CORS(cfg.AllowedOrigins))
 	s.router.Use(middleware.Logger())
-	s.router.Use(middleware.APIKeyAuth(cfg.APIAuthToken))
 
 	s.registerRoutes()
 

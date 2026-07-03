@@ -61,7 +61,7 @@ services:
       - "8080:8080"
     volumes:
       - keycloak_data:/opt/keycloak/data
-      - ./infrastructure/keycloak:/opt/keycloak/data/import
+      - ./infrastructure/keycloak:/opt/keycloak/data/import:ro
     networks:
       - onboarder_net
 
@@ -104,12 +104,12 @@ services:
       DATABASE_URL: postgres://postgres:postgres@postgres:5432/onboarder?sslmode=disable
 
       KEYCLOAK_BASE_URL: http://keycloak:8080
-      KEYCLOAK_REALM: master
+      KEYCLOAK_REALM: onboarder
       KEYCLOAK_ADMIN_CLIENT_ID: onboarder-admin
-      KEYCLOAK_ADMIN_CLIENT_SECRET:
+      KEYCLOAK_ADMIN_CLIENT_SECRET: onboarder-admin-secret
 
       ALLOWED_ORIGINS: http://localhost:3000,http://localhost:5173
-      API_AUTH_TOKEN:
+      API_AUTH_TOKEN: A/HhdKZWaaPuL/JiouoKDrf4y0sXdK8u3bfdVQDGkZK2foubw90jEwwP/b3cOStl
     ports:
       - "9000:9000"
     networks:
@@ -136,7 +136,7 @@ services:
         condition: service_healthy
     environment:
       VITE_API_BASE_URL: http://localhost:9000/api/v1
-      VITE_API_AUTH_TOKEN:
+      VITE_API_AUTH_TOKEN: A/HhdKZWaaPuL/JiouoKDrf4y0sXdK8u3bfdVQDGkZK2foubw90jEwwP/b3cOStl
     ports:
       - "3000:5173"
     networks:
