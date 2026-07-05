@@ -23,7 +23,6 @@
         "description": "Read-only user"
       }
     ]
-    
   },
   "groups": [
     {
@@ -83,7 +82,6 @@
       "defaultClientScopes": ["web-origins", "profile", "email", "roles"],
       "optionalClientScopes": ["address", "phone", "offline_access"]
     }
-   
   ],
   "users": [
     {
@@ -136,6 +134,20 @@
       ],
       "realmRoles": ["viewer"],
       "groups": ["/Viewers"]
+    },
+    {
+      "username": "service-account-onboarder-admin",
+      "enabled": true,
+      "serviceAccountClientId": "onboarder-admin",
+      "clientRoles": {
+        "realm-management": [
+          "manage-clients",
+          "view-clients",
+          "query-clients",
+          "manage-realm",
+          "view-realm"
+        ]
+      }
     }
   ]
 }
