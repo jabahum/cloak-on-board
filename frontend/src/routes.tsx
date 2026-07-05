@@ -1,6 +1,6 @@
 import { Navigate, Route, Routes } from "react-router-dom";
 import { AppLayout } from "./layouts/AppLayout";
-import { ApplicationCreatePage } from "./pages/applications/ApplicationCreatePage";
+import { ApplicationWizardPage } from "./pages/applications/wizard/ApplicationWizardPage";
 import { ApplicationDetailPage } from "./pages/applications/ApplicationDetailPage";
 import { ApplicationsPage } from "./pages/applications/ApplicationsPage";
 import { DashboardPage } from "./pages/dashboard/DashboardPage";
@@ -15,7 +15,7 @@ export function AppRoutes() {
         <Route path="/" element={<Navigate to="/dashboard" replace />} />
         <Route path="/dashboard" element={<DashboardPage />} />
         <Route path="/applications" element={<ApplicationsPage />} />
-        <Route path="/applications/new" element={<ApplicationCreatePage />} />
+        <Route path="/applications/new" element={<ApplicationWizardPage />} />
         <Route path="/applications/:id" element={<ApplicationDetailPage />} />
         <Route path="/templates" element={<TemplatesPage />} />
         <Route path="/jobs" element={<ProvisioningJobsPage />} />
