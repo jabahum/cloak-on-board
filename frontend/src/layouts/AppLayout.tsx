@@ -2,11 +2,15 @@ import { Outlet, NavLink } from "react-router-dom";
 import {
   Header,
   HeaderName,
+  HeaderGlobalAction,
+  HeaderGlobalBar,
   SideNav,
   SideNavItems,
   SideNavLink,
   Content,
 } from "@carbon/react";
+import { Logout } from "@carbon/icons-react";
+import { logout } from "../auth/keycloak";
 
 export function AppLayout() {
   return (
@@ -15,6 +19,12 @@ export function AppLayout() {
         <HeaderName href="/" prefix="SSO">
           App Onboarder
         </HeaderName>
+
+        <HeaderGlobalBar>
+          <HeaderGlobalAction aria-label="Logout" onClick={() => logout()}>
+            <Logout size={20} />
+          </HeaderGlobalAction>
+        </HeaderGlobalBar>
       </Header>
 
       <SideNav expanded isFixedNav aria-label="Side navigation">

@@ -12,10 +12,15 @@ type Config struct {
 	AppEnv  string
 	AppPort string
 
+	AuthMode string
+
 	AllowedOrigins []string
 	APIAuthToken   string
 
 	DatabaseURL string
+
+	KeycloakPublicURL   string
+	KeycloakInternalURL string
 
 	KeycloakBaseURL           string
 	KeycloakRealm             string
@@ -27,14 +32,18 @@ func Load() (Config, error) {
 	_ = godotenv.Load()
 
 	return Config{
-		AppName: getEnv("APP_NAME", "keycloak-onboarder"),
-		AppEnv:  getEnv("APP_ENV", "development"),
-		AppPort: getEnv("APP_PORT", "9000"),
+		AppName:  getEnv("APP_NAME", "keycloak-onboarder"),
+		AppEnv:   getEnv("APP_ENV", "development"),
+		AppPort:  getEnv("APP_PORT", "9000"),
+		AuthMode: getEnv("AUTH_MODE", "api_key"),
 
 		AllowedOrigins: strings.Split(getEnv("ALLOWED_ORIGINS", "http://localhost:5173"), ","),
 		APIAuthToken:   getEnv("API_AUTH_TOKEN", ""),
 
 		DatabaseURL: getEnv("DATABASE_URL", ""),
+
+		KeycloakPublicURL:   getEnv("KEYCLOAK_PUBLIC_URL", ""),
+		KeycloakInternalURL: getEnv("KEYCLOAK_INTERNAL_URL", ""),
 
 		KeycloakBaseURL:           getEnv("KEYCLOAK_BASE_URL", ""),
 		KeycloakRealm:             getEnv("KEYCLOAK_REALM", ""),

@@ -23,6 +23,7 @@
         "description": "Read-only user"
       }
     ]
+    
   },
   "groups": [
     {
@@ -81,115 +82,8 @@
       },
       "defaultClientScopes": ["web-origins", "profile", "email", "roles"],
       "optionalClientScopes": ["address", "phone", "offline_access"]
-    },
-    {
-      "clientId": "health-bi",
-      "name": "Health BI Demo",
-      "enabled": true,
-      "protocol": "openid-connect",
-      "publicClient": true,
-      "standardFlowEnabled": true,
-      "directAccessGrantsEnabled": false,
-      "serviceAccountsEnabled": false,
-      "redirectUris": ["http://localhost:3000/health-bi/*"],
-      "webOrigins": ["http://localhost:3000"],
-      "attributes": {
-        "pkce.code.challenge.method": "S256"
-      },
-      "defaultClientScopes": ["web-origins", "profile", "email", "roles"],
-      "optionalClientScopes": ["offline_access"],
-      "protocolMappers": [
-        {
-          "name": "client roles",
-          "protocol": "openid-connect",
-          "protocolMapper": "oidc-usermodel-client-role-mapper",
-          "config": {
-            "claim.name": "resource_access.${client_id}.roles",
-            "jsonType.label": "String",
-            "multivalued": "true",
-            "access.token.claim": "true",
-            "id.token.claim": "true",
-            "userinfo.token.claim": "true"
-          }
-        },
-        {
-          "name": "realm roles",
-          "protocol": "openid-connect",
-          "protocolMapper": "oidc-usermodel-realm-role-mapper",
-          "config": {
-            "claim.name": "realm_access.roles",
-            "jsonType.label": "String",
-            "multivalued": "true",
-            "access.token.claim": "true",
-            "id.token.claim": "true",
-            "userinfo.token.claim": "true"
-          }
-        }
-      ],
-      "roles": {
-        "access": {
-          "description": "Can access Health BI"
-        },
-        "admin": {
-          "description": "Health BI administrator"
-        },
-        "manager": {
-          "description": "Health BI manager"
-        },
-        "viewer": {
-          "description": "Health BI viewer"
-        }
-      }
-    },
-    {
-      "clientId": "health-api",
-      "name": "Health API Demo",
-      "enabled": true,
-      "protocol": "openid-connect",
-      "publicClient": false,
-      "clientAuthenticatorType": "client-secret",
-      "secret": "health-api-secret",
-      "standardFlowEnabled": false,
-      "directAccessGrantsEnabled": false,
-      "serviceAccountsEnabled": false,
-      "bearerOnly": false,
-      "redirectUris": [],
-      "webOrigins": [],
-      "roles": {
-        "access": {
-          "description": "Can access Health API"
-        },
-        "admin": {
-          "description": "Health API administrator"
-        },
-        "viewer": {
-          "description": "Health API viewer"
-        }
-      }
-    },
-    {
-      "clientId": "analytics-worker",
-      "name": "Analytics Worker Demo",
-      "enabled": true,
-      "protocol": "openid-connect",
-      "publicClient": false,
-      "clientAuthenticatorType": "client-secret",
-      "secret": "analytics-worker-secret",
-      "standardFlowEnabled": false,
-      "directAccessGrantsEnabled": false,
-      "serviceAccountsEnabled": true,
-      "bearerOnly": false,
-      "redirectUris": [],
-      "webOrigins": [],
-      "roles": {
-        "access": {
-          "description": "Can access worker resources"
-        },
-        "service": {
-          "description": "Service account role"
-        }
-      }
     }
+   
   ],
   "users": [
     {

@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/jabahum/keycloak-onboarder/backend/internal/auth"
 	"github.com/jabahum/keycloak-onboarder/backend/internal/middleware"
 )
 
@@ -19,8 +20,13 @@ func (s *Server) registerRoutes() {
 	})
 
 	protected := api.Group("")
-	protected.Use(middleware.APIKeyAuth(s.config.APIAuthToken))
-
+	if s.config.AuthMode == "keycloak" {
+		issuer := s.config.KeycloakPublicURL + "/realms/" + s.config.KeycloakRealm
+		jwks := auth.NewJWKSProvider(s.config.KeycloakInternalURL, s.config.KeycloakRealm)
+		protected.Use(auth.JWTAuth(jwks, issuer))
+	} else {
+		protected.Use(middleware.APIKeyAuth(s.config.APIAuthToken))
+	}
 	s.applicationHandler().RegisterRoutes(protected)
 	s.templateHandler().RegisterRoutes(protected)
 	s.settingsHandler().RegisterRoutes(protected)
