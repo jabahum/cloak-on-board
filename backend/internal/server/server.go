@@ -62,6 +62,7 @@ func (s *Server) applicationHandler() *applications.Handler {
 	handler.SetProvisioner(func(ctx context.Context, applicationID string) (any, error) {
 		return provisioner.ProvisionApplication(ctx, applicationID)
 	})
+	handler.SetClientManager(provisioning.NewClientManager(appService, settingsService, jobService))
 
 	return handler
 }

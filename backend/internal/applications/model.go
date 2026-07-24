@@ -11,6 +11,8 @@ type Application struct {
 	OwnerName   string    `json:"owner_name"`
 	OwnerEmail  string    `json:"owner_email"`
 	Status      string    `json:"status"`
+	Source      string    `json:"source"`
+	Enabled     bool      `json:"enabled"`
 	CreatedAt   time.Time `json:"created_at"`
 	UpdatedAt   time.Time `json:"updated_at"`
 

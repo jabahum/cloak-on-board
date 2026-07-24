@@ -8,6 +8,7 @@ import {
 } from "@carbon/react";
 import { listTemplates, seedTemplates } from "../../api/templates";
 import type { OnboardingTemplate } from "../../types/template";
+import axios from "axios";
 
 export function TemplatesPage() {
   const [templates, setTemplates] = useState<OnboardingTemplate[]>([]);
@@ -24,7 +25,10 @@ export function TemplatesPage() {
   }
 
   useEffect(() => {
-    load();
+    listTemplates()
+      .then(setTemplates)
+      .catch(() => setError("Failed to load templates"))
+      .finally(() => setLoading(false));
   }, []);
 
   async function handleSeed() {
@@ -35,8 +39,12 @@ export function TemplatesPage() {
       const res = await seedTemplates();
       setMessage(res.message);
       await load();
-    } catch (err: any) {
-      setError(err?.response?.data?.error ?? "Failed to seed templates");
+    } catch (err: unknown) {
+      setError(
+        axios.isAxiosError(err)
+          ? (err.response?.data?.error ?? err.message)
+          : "Failed to seed templates",
+      );
     }
   }
 

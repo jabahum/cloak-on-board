@@ -13,11 +13,11 @@
 
 ## Phase 2
 
-- [ ] Client Scope UI
-- [ ] Protocol Mapper UI
-- [ ] Import Existing Clients
-- [ ] Update Existing Clients
-- [ ] Delete Clients
+- [x] Client Scope UI
+- [x] Protocol Mapper UI
+- [x] Import Existing Clients
+- [x] Update Existing Clients
+- [x] Delete Clients
 
 ---
 

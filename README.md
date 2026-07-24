@@ -11,8 +11,9 @@ The goal of this project is to eliminate repetitive Keycloak administration task
 ## Application Management
 
 - Register applications
+- Import existing Keycloak clients
 - Update application information
-- Delete applications
+- Delete locally or delete linked Keycloak clients
 - View application details
 - Store application metadata
 - Track provisioning status

@@ -191,15 +191,39 @@ Response
 PUT /applications/{id}
 ```
 
-Updates an existing application.
+Updates local metadata, URLs and roles. When the application is linked to a
+Keycloak client, supported client settings and roles are synchronized through
+a tracked `update_application` job.
+
+Request
+
+```json
+{
+  "name": "Health BI",
+  "slug": "health-bi",
+  "description": "Integrated Health BI",
+  "app_type": "frontend",
+  "owner_name": "HMIS Team",
+  "owner_email": "hmis@example.org",
+  "redirect_uris": ["https://health.example.org/*"],
+  "web_origins": ["https://health.example.org"],
+  "roles": ["admin", "viewer"],
+  "enabled": true
+}
+```
 
 ---
 
 ## Delete Application
 
 ```
-DELETE /applications/{id}
+DELETE /applications/{id}?delete_keycloak=false
 ```
+
+`delete_keycloak=false` removes only the local application. Set it explicitly
+to `true` to delete the linked client by its stored Keycloak UUID before
+removing the local application. A failed Keycloak deletion leaves the local
+record intact. Missing Keycloak clients are treated as already deleted.
 
 Response
 
@@ -227,6 +251,131 @@ Response
   }
 }
 ```
+
+---
+
+# Keycloak Client Import
+
+Client secrets are never included in discovery or import responses.
+
+## Search Realm Clients
+
+```
+GET /keycloak/clients?search=health
+```
+
+Each result contains its Keycloak UUID, client ID, display metadata and core
+flow settings. `imported` is true when the UUID is already linked locally.
+
+## Import Client
+
+```
+POST /applications/import
+```
+
+```json
+{
+  "keycloak_client_uuid": "5c387c42-ef66-4daf-8b72-bf617eb8e839",
+  "name": "Health BI",
+  "description": "Existing realm client",
+  "app_type": "frontend",
+  "owner_name": "HMIS Team",
+  "owner_email": "hmis@example.org"
+}
+```
+
+The server fetches the complete client representation and roles from
+Keycloak, infers `app_type` when omitted, and creates the linked local record
+transactionally. Duplicate slugs, client IDs and Keycloak UUIDs return `409`.
+
+---
+
+# Client Scopes
+
+## List Assignments
+
+```
+GET /applications/{id}/client-scopes
+```
+
+Returns `default`, `optional`, and `available` realm client-scope arrays.
+
+## Assign or Change Assignment
+
+```
+PUT /applications/{id}/client-scopes/{scopeId}
+```
+
+```json
+{
+  "type": "default"
+}
+```
+
+`type` must be `default` or `optional`. Assignment is idempotent and moving a
+scope removes its previous assignment type.
+
+## Remove Assignment
+
+```
+DELETE /applications/{id}/client-scopes/{scopeId}?type=default
+```
+
+Returns `204 No Content`. `type` must be `default` or `optional`.
+
+---
+
+# Protocol Mappers
+
+Supported mapper types are OIDC user-attribute, client-role and realm-role
+mappers.
+
+## List Mappers
+
+```
+GET /applications/{id}/protocol-mappers
+```
+
+## Create Mapper
+
+```
+POST /applications/{id}/protocol-mappers
+```
+
+```json
+{
+  "name": "department",
+  "protocol": "openid-connect",
+  "protocolMapper": "oidc-usermodel-attribute-mapper",
+  "config": {
+    "user.attribute": "department",
+    "claim.name": "department",
+    "jsonType.label": "String",
+    "id.token.claim": "true",
+    "access.token.claim": "true",
+    "userinfo.token.claim": "true"
+  }
+}
+```
+
+## Update Mapper
+
+```
+PUT /applications/{id}/protocol-mappers/{mapperId}
+```
+
+The request body uses the same representation as create.
+
+## Delete Mapper
+
+```
+DELETE /applications/{id}/protocol-mappers/{mapperId}
+```
+
+Returns `204 No Content`.
+
+All scope and mapper endpoints return `409` when the local application is not
+linked to a Keycloak client.
 
 ---
 

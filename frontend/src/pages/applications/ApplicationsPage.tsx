@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import {
   Button,
+  Checkbox,
   DataTable,
   Table,
   TableHead,
@@ -13,11 +14,18 @@ import {
   TableToolbarContent,
   Tag,
   InlineLoading,
+  InlineNotification,
+  Modal,
+  TextInput,
 } from "@carbon/react";
-import { Add } from "@carbon/icons-react";
+import { Add, ImportExport } from "@carbon/icons-react";
 import { Link } from "react-router-dom";
-import { listApplications } from "../../api/applications";
+import {
+  deleteApplication,
+  listApplications,
+} from "../../api/applications";
 import type { Application } from "../../types/application";
+import axios from "axios";
 
 const headers = [
   { key: "name", header: "Name" },
@@ -31,6 +39,11 @@ const headers = [
 export function ApplicationsPage() {
   const [apps, setApps] = useState<Application[]>([]);
   const [loading, setLoading] = useState(true);
+  const [deleteTarget, setDeleteTarget] = useState<Application | null>(null);
+  const [deleteFromKeycloak, setDeleteFromKeycloak] = useState(false);
+  const [confirmation, setConfirmation] = useState("");
+  const [deleting, setDeleting] = useState(false);
+  const [error, setError] = useState("");
 
   useEffect(() => {
     listApplications()
@@ -48,6 +61,32 @@ export function ApplicationsPage() {
     actions: app.id,
   }));
 
+  async function confirmDelete() {
+    if (!deleteTarget) return;
+    setDeleting(true);
+    setError("");
+    try {
+      await deleteApplication(deleteTarget.id, deleteFromKeycloak);
+      setApps((current) =>
+        current.filter((app) => app.id !== deleteTarget.id),
+      );
+      setDeleteTarget(null);
+      setDeleteFromKeycloak(false);
+      setConfirmation("");
+    } catch (err) {
+      setError(
+        axios.isAxiosError(err)
+          ? (err.response?.data?.error ?? err.message)
+          : err instanceof Error
+            ? err.message
+            : "Delete failed",
+      );
+      setDeleteTarget(null);
+    } finally {
+      setDeleting(false);
+    }
+  }
+
   return (
     <>
       <div className="page-header">
@@ -57,6 +96,10 @@ export function ApplicationsPage() {
         </p>
       </div>
 
+      {error && (
+        <InlineNotification kind="error" title="Delete failed" subtitle={error} />
+      )}
+
       {loading ? (
         <InlineLoading description="Loading applications..." />
       ) : (
@@ -65,6 +108,14 @@ export function ApplicationsPage() {
             <TableContainer>
               <TableToolbar>
                 <TableToolbarContent>
+                  <Button
+                    as={Link}
+                    kind="secondary"
+                    to="/applications/import"
+                    renderIcon={ImportExport}
+                  >
+                    Import from Keycloak
+                  </Button>
                   <Button as={Link} to="/applications/new" renderIcon={Add}>
                     New application
                   </Button>
@@ -99,14 +150,37 @@ export function ApplicationsPage() {
                               {cell.value}
                             </Tag>
                           ) : cell.info.header === "actions" ? (
-                            <Button
-                              as={Link}
-                              size="sm"
-                              kind="ghost"
-                              to={`/applications/${cell.value}`}
-                            >
-                              View
-                            </Button>
+                            <div className="table-actions">
+                              <Button
+                                as={Link}
+                                size="sm"
+                                kind="ghost"
+                                to={`/applications/${cell.value}`}
+                              >
+                                View
+                              </Button>
+                              <Button
+                                as={Link}
+                                size="sm"
+                                kind="ghost"
+                                to={`/applications/${cell.value}/edit`}
+                              >
+                                Edit
+                              </Button>
+                              <Button
+                                size="sm"
+                                kind="danger--ghost"
+                                onClick={() =>
+                                  setDeleteTarget(
+                                    apps.find(
+                                      (app) => app.id === cell.value,
+                                    ) ?? null,
+                                  )
+                                }
+                              >
+                                Delete
+                              </Button>
+                            </div>
                           ) : (
                             cell.value
                           )}
@@ -120,6 +194,41 @@ export function ApplicationsPage() {
           )}
         </DataTable>
       )}
+
+      <Modal
+        danger
+        open={Boolean(deleteTarget)}
+        modalHeading="Delete application?"
+        primaryButtonText={deleting ? "Deleting..." : "Delete"}
+        secondaryButtonText="Cancel"
+        primaryButtonDisabled={
+          deleting ||
+          (deleteFromKeycloak && confirmation !== deleteTarget?.slug)
+        }
+        onRequestSubmit={confirmDelete}
+        onRequestClose={() => setDeleteTarget(null)}
+      >
+        <div className="phase-two-stack">
+          <p>Local-only deletion leaves the Keycloak client untouched.</p>
+          <Checkbox
+            id="list-delete-from-keycloak"
+            labelText="Also permanently delete the linked Keycloak client"
+            checked={deleteFromKeycloak}
+            disabled={!deleteTarget?.keycloak_client_uuid}
+            onChange={(_, data) =>
+              setDeleteFromKeycloak(Boolean(data.checked))
+            }
+          />
+          {deleteFromKeycloak && (
+            <TextInput
+              id="list-delete-confirmation"
+              labelText={`Type ${deleteTarget?.slug} to confirm`}
+              value={confirmation}
+              onChange={(event) => setConfirmation(event.target.value)}
+            />
+          )}
+        </div>
+      </Modal>
     </>
   );
 }

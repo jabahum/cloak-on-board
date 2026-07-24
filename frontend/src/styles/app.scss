@@ -31,3 +31,35 @@
   gap: 1rem;
   justify-content: flex-end;
 }
+
+.detail-actions,
+.table-actions {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.detail-actions {
+  margin-top: 1rem;
+}
+
+.phase-two-stack {
+  display: grid;
+  gap: 1rem;
+}
+
+.inline-form {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-end;
+}
+
+.inline-form > :first-child {
+  flex: 1;
+}
+
+.tag-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
