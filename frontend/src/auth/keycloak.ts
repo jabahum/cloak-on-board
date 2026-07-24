@@ -6,14 +6,23 @@ export const keycloak = new Keycloak({
   clientId: import.meta.env.VITE_KEYCLOAK_CLIENT_ID ?? "keycloak-onboarder-ui",
 });
 
-export async function initKeycloak() {
-  const authenticated = await keycloak.init({
-    onLoad: "login-required",
-    pkceMethod: "S256",
-    checkLoginIframe: false,
-  });
+let initialization: Promise<boolean> | null = null;
 
-  return authenticated;
+export async function initKeycloak() {
+  if (!initialization) {
+    initialization = keycloak
+      .init({
+        onLoad: "login-required",
+        pkceMethod: "S256",
+        checkLoginIframe: false,
+      })
+      .catch((error) => {
+        initialization = null;
+        throw error;
+      });
+  }
+
+  return initialization;
 }
 
 export async function refreshToken() {

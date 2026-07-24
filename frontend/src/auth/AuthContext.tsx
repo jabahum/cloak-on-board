@@ -9,7 +9,7 @@ import {
 } from "react";
 import { Button, InlineLoading, InlineNotification } from "@carbon/react";
 import { api } from "../api/client";
-import { initKeycloak, keycloak, logout } from "./keycloak";
+import { initKeycloak, logout } from "./keycloak";
 
 export type Role = "admin" | "manager" | "viewer";
 export type Permission =
@@ -89,7 +89,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           title="Unable to sign in"
           subtitle={error || "No supported cloak-on-board role was found."}
         />
-        <Button onClick={() => void keycloak.login()}>Try again</Button>
+        <Button onClick={() => window.location.reload()}>Try again</Button>
       </div>
     );
   }
