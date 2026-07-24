@@ -60,6 +60,14 @@ Every provisioning operation creates a job that tracks:
 - Errors
 - Execution history
 
+## Security and Governance
+
+- Keycloak user authentication with PKCE
+- Viewer, manager, and administrator permissions
+- Versioned approval requests for Keycloak mutations
+- Append-only audit history
+- Durable per-user in-app notifications
+
 ## Settings
 
 Configure the Keycloak connection without modifying application code.

@@ -1,6 +1,7 @@
 package config
 
 import (
+	"errors"
 	"os"
 	"strings"
 
@@ -26,12 +27,13 @@ type Config struct {
 	KeycloakRealm             string
 	KeycloakAdminClientID     string
 	KeycloakAdminClientSecret string
+	KeycloakAudience          string
 }
 
 func Load() (Config, error) {
 	_ = godotenv.Load()
 
-	return Config{
+	cfg := Config{
 		AppName:  getEnv("APP_NAME", "keycloak-onboarder"),
 		AppEnv:   getEnv("APP_ENV", "development"),
 		AppPort:  getEnv("APP_PORT", "9000"),
@@ -49,7 +51,16 @@ func Load() (Config, error) {
 		KeycloakRealm:             getEnv("KEYCLOAK_REALM", ""),
 		KeycloakAdminClientID:     getEnv("KEYCLOAK_ADMIN_CLIENT_ID", ""),
 		KeycloakAdminClientSecret: getEnv("KEYCLOAK_ADMIN_CLIENT_SECRET", ""),
-	}, nil
+		KeycloakAudience:          getEnv("KEYCLOAK_AUDIENCE", "keycloak-onboarder-ui"),
+	}
+	if cfg.AuthMode == "keycloak" &&
+		(cfg.KeycloakPublicURL == "" || cfg.KeycloakInternalURL == "" || cfg.KeycloakRealm == "" || cfg.KeycloakAudience == "") {
+		return Config{}, errors.New("keycloak authentication requires public URL, internal URL, realm, and audience")
+	}
+	if cfg.AppEnv == "production" && cfg.AuthMode != "keycloak" {
+		return Config{}, errors.New("production requires AUTH_MODE=keycloak")
+	}
+	return cfg, nil
 }
 
 func getEnv(key string, fallback string) string {

@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/jabahum/keycloak-onboarder/backend/internal/auth"
 	"github.com/jabahum/keycloak-onboarder/backend/internal/response"
 )
 
@@ -16,9 +17,9 @@ func NewHandler(service *Service) *Handler {
 }
 
 func (h *Handler) RegisterRoutes(rg *gin.RouterGroup) {
-	rg.GET("/templates", h.List)
-	rg.GET("/templates/:id", h.GetByID)
-	rg.POST("/templates/seed", h.SeedDefaults)
+	rg.GET("/templates", auth.RequirePermission(auth.PermissionRead), h.List)
+	rg.GET("/templates/:id", auth.RequirePermission(auth.PermissionRead), h.GetByID)
+	rg.POST("/templates/seed", auth.RequirePermission(auth.PermissionManageSettings), h.SeedDefaults)
 }
 
 func (h *Handler) List(c *gin.Context) {

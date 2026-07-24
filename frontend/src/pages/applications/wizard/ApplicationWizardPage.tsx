@@ -19,11 +19,14 @@ import { TemplateStep } from "./steps/TemplateStep";
 import { UrlsStep } from "./steps/UrlsStep";
 import { initialWizardForm, type WizardForm } from "./wizardTypes";
 import axios from "axios";
+import { useAuth } from "../../../auth/AuthContext";
+import { submitApproval } from "../../../api/approvals";
 
 const steps = ["Template", "General", "URLs", "Roles", "Review"];
 
 export function ApplicationWizardPage() {
   const navigate = useNavigate();
+  const { can } = useAuth();
 
   const [currentStep, setCurrentStep] = useState(0);
   const [templates, setTemplates] = useState<OnboardingTemplate[]>([]);
@@ -116,8 +119,10 @@ export function ApplicationWizardPage() {
         roles: form.roles,
       });
 
-      if (form.auto_provision) {
+      if (form.auto_provision && can("admin_clients")) {
         await provisionApplication(app.id);
+      } else if (form.auto_provision) {
+        await submitApproval(app.id, "provision_application", {}, "Provision new application");
       }
 
       navigate(`/applications/${app.id}`);

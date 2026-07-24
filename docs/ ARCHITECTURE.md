@@ -655,6 +655,35 @@ The current monolith has been intentionally structured so that each module can l
 
 ---
 
+# Phase 3 Security Architecture
+
+Keycloak authenticates browser users with authorization code flow and PKCE.
+The API validates RS256 access tokens against cached JWKS, issuer, lifetime,
+and audience before resolving an effective realm role.
+
+```text
+Keycloak login
+      │
+      ▼
+JWT authentication → permission middleware → handler/service
+                                             │
+                         ┌───────────────────┼───────────────────┐
+                         ▼                   ▼                   ▼
+                    Audit log          Approval request     Notification
+                                             │
+                                      Admin decision
+                                             │
+                                             ▼
+                                  Existing provisioning engine
+```
+
+Approval requests store immutable proposed payloads and the application
+configuration version. Only an accepted, non-stale request reaches the existing
+Keycloak mutation services. Audit records are append-only, and notifications
+are isolated by Keycloak subject.
+
+---
+
 # Design Decisions
 
 ## Why Go?

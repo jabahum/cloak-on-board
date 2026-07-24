@@ -5,10 +5,22 @@ import "github.com/gin-gonic/gin"
 const UserContextKey = "auth_user"
 
 type User struct {
-	Subject    string
-	Username   string
-	Email      string
-	RealmRoles []string
+	Subject     string
+	Username    string
+	Email       string
+	DisplayName string
+	RealmRoles  []string
+}
+
+func (u User) EffectiveRole() string {
+	for _, wanted := range []string{"admin", "manager", "viewer"} {
+		for _, role := range u.RealmRoles {
+			if role == wanted {
+				return wanted
+			}
+		}
+	}
+	return ""
 }
 
 func SetUser(c *gin.Context, user User) {

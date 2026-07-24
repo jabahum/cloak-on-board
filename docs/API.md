@@ -103,6 +103,9 @@ Response
 
 Applications represent systems that will be onboarded into Keycloak.
 
+All endpoints except `/health` require authentication. Authorization failures
+return `401` or `403` with a request ID.
+
 ---
 
 ## List Applications
@@ -628,6 +631,85 @@ Future versions of the platform will expose an OpenAPI (Swagger) specification.
 
 /openapi.json
 ```
+
+---
+
+# Phase 3 Security and Workflow APIs
+
+## Current User
+
+`GET /auth/me` returns the Keycloak subject, username, email, display name,
+realm roles, and effective `admin`, `manager`, or `viewer` role. It also
+registers the current user for targeted notifications.
+
+## Approval Requests
+
+```
+POST /applications/{id}/approval-requests
+```
+
+```json
+{
+  "action": "provision_application",
+  "payload": {},
+  "summary": "Provision the application"
+}
+```
+
+Supported actions are `provision_application`, `update_keycloak_client`, and
+`delete_keycloak_client`.
+
+```
+GET  /approval-requests
+GET  /approval-requests/{id}
+POST /approval-requests/{id}/approve
+POST /approval-requests/{id}/reject
+POST /approval-requests/{id}/cancel
+POST /approval-requests/{id}/retry
+```
+
+Decision bodies accept `{"comment":"..."}`. Rejection comments are required.
+Managers see their own requests; admins see all. Only admins may approve,
+reject, or retry. Requesters cannot approve their own requests. Stale versions
+and duplicate active requests return `409`.
+
+## Notifications
+
+```
+GET /notifications
+GET /notifications/unread-count
+PUT /notifications/{id}/read
+PUT /notifications/read-all
+```
+
+Notification access is scoped to the authenticated subject. Approval
+submission, decisions, cancellation, execution success, and execution failure
+produce deduplicated notifications.
+
+## Audit Logs
+
+Admin only:
+
+```
+GET /audit-logs
+GET /audit-logs/{id}
+```
+
+Filters include `actor`, `action`, `resource_type`, `application_id`,
+`result`, `from`, `to`, `page`, and `page_size`. Records are append-only and
+preserved after application deletion.
+
+## Role Matrix
+
+| Capability | Viewer | Manager | Admin |
+| --- | --- | --- | --- |
+| Read applications, templates, and jobs | Yes | Yes | Yes |
+| Manage drafts and imports | No | Yes | Yes |
+| Submit and cancel own approvals | No | Yes | Yes |
+| Mutate linked Keycloak clients directly | No | No | Yes |
+| Review approvals | No | No | Yes |
+| Manage settings and templates | No | No | Yes |
+| View audit logs | No | No | Yes |
 
 ---
 

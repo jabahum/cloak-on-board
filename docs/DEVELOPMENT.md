@@ -233,6 +233,21 @@ npm install
 npm run dev
 ```
 
+Authentication requires the `onboarder` development realm and these backend
+variables:
+
+```text
+AUTH_MODE=keycloak
+KEYCLOAK_PUBLIC_URL=http://localhost:8080
+KEYCLOAK_INTERNAL_URL=http://localhost:8080
+KEYCLOAK_REALM=onboarder
+KEYCLOAK_AUDIENCE=keycloak-onboarder-ui
+```
+
+The realm import includes development-only admin, manager, and viewer examples.
+Assign production users through the Administrators, Managers, or Viewers group;
+never reuse the development credentials.
+
 ---
 
 # Coding Standards

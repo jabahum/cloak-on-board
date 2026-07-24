@@ -9,8 +9,10 @@ import {
 import { listTemplates, seedTemplates } from "../../api/templates";
 import type { OnboardingTemplate } from "../../types/template";
 import axios from "axios";
+import { useAuth } from "../../auth/AuthContext";
 
 export function TemplatesPage() {
+  const { can } = useAuth();
   const [templates, setTemplates] = useState<OnboardingTemplate[]>([]);
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState("");
@@ -64,7 +66,7 @@ export function TemplatesPage() {
         <InlineNotification kind="error" title="Error" subtitle={error} />
       )}
 
-      <Button onClick={handleSeed}>Seed default templates</Button>
+      {can("manage_settings") && <Button onClick={handleSeed}>Seed default templates</Button>}
 
       <br />
       <br />

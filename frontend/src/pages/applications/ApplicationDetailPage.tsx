@@ -25,10 +25,13 @@ import type { ProvisioningJob } from "../../types/provisioning";
 import axios from "axios";
 import { ClientScopesTab } from "./ClientScopesTab";
 import { ProtocolMappersTab } from "./ProtocolMappersTab";
+import { useAuth } from "../../auth/AuthContext";
+import { submitApproval } from "../../api/approvals";
 
 export function ApplicationDetailPage() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { can } = useAuth();
 
   const [app, setApp] = useState<Application | null>(null);
   const [job, setJob] = useState<ProvisioningJob | null>(null);
@@ -108,6 +111,29 @@ export function ApplicationDetailPage() {
     }
   }
 
+  async function handleSubmitApproval() {
+    if (!id) return;
+    setProvisioning(true);
+    setError("");
+    try {
+      await submitApproval(
+        id,
+        "provision_application",
+        {},
+        "Provision application in Keycloak",
+      );
+      await load();
+    } catch (err) {
+      setError(
+        axios.isAxiosError(err)
+          ? (err.response?.data?.error ?? err.message)
+          : err instanceof Error ? err.message : "Approval submission failed",
+      );
+    } finally {
+      setProvisioning(false);
+    }
+  }
+
   if (loading) {
     return <InlineLoading description="Loading application..." />;
   }
@@ -129,14 +155,14 @@ export function ApplicationDetailPage() {
         <p className="page-subtitle">
           {app.description || "Application details"}
         </p>
-        <div className="detail-actions">
+        {can("manage_drafts") && <div className="detail-actions">
           <Button as={Link} kind="secondary" to={`/applications/${app.id}/edit`}>
             Edit
           </Button>
-          <Button kind="danger--tertiary" onClick={() => setDeleteOpen(true)}>
+          {can("admin_clients") && <Button kind="danger--tertiary" onClick={() => setDeleteOpen(true)}>
             Delete
-          </Button>
-        </div>
+          </Button>}
+        </div>}
       </div>
 
       {error && (
@@ -159,7 +185,10 @@ export function ApplicationDetailPage() {
             <OverviewTab
               app={app}
               onProvision={handleProvision}
+              onSubmitApproval={handleSubmitApproval}
               provisioning={provisioning}
+              canProvision={can("admin_clients")}
+              canSubmit={can("submit_approval")}
             />
           </TabPanel>
 
@@ -172,11 +201,11 @@ export function ApplicationDetailPage() {
           </TabPanel>
 
           <TabPanel>
-            <ClientScopesTab applicationId={app.id} />
+            <ClientScopesTab applicationId={app.id} canManage={can("admin_clients")} />
           </TabPanel>
 
           <TabPanel>
-            <ProtocolMappersTab applicationId={app.id} />
+            <ProtocolMappersTab applicationId={app.id} canManage={can("admin_clients")} />
           </TabPanel>
 
           <TabPanel>
@@ -233,11 +262,17 @@ export function ApplicationDetailPage() {
 function OverviewTab({
   app,
   onProvision,
+  onSubmitApproval,
   provisioning,
+  canProvision,
+  canSubmit,
 }: {
   app: Application;
   onProvision: () => void;
+  onSubmitApproval: () => void;
   provisioning: boolean;
+  canProvision: boolean;
+  canSubmit: boolean;
 }) {
   return (
     <>
@@ -303,9 +338,15 @@ function OverviewTab({
 
       <br />
 
-      <Button onClick={onProvision} disabled={provisioning}>
-        {provisioning ? "Provisioning..." : "Provision to Keycloak"}
-      </Button>
+      {canProvision ? (
+        <Button onClick={onProvision} disabled={provisioning}>
+          {provisioning ? "Provisioning..." : "Admin override: provision now"}
+        </Button>
+      ) : canSubmit && app.status !== "pending_approval" ? (
+        <Button onClick={onSubmitApproval} disabled={provisioning}>
+          {provisioning ? "Submitting..." : "Submit for approval"}
+        </Button>
+      ) : null}
     </>
   );
 }

@@ -23,11 +23,11 @@
 
 ## Phase 3
 
-- [ ] User Authentication
-- [ ] Role-Based Access Control
-- [ ] Audit Logs
-- [ ] Notifications
-- [ ] Approval Workflow
+- [x] User Authentication
+- [x] Role-Based Access Control
+- [x] Audit Logs
+- [x] Notifications
+- [x] Approval Workflow
 
 ---
 

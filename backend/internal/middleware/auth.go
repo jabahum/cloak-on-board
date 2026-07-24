@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
+	"github.com/jabahum/keycloak-onboarder/backend/internal/auth"
 )
 
 func APIKeyAuth(expectedToken string) gin.HandlerFunc {
@@ -12,6 +13,7 @@ func APIKeyAuth(expectedToken string) gin.HandlerFunc {
 		expectedToken = strings.TrimSpace(expectedToken)
 
 		if expectedToken == "" {
+			auth.SetUser(c, auth.User{Subject: "development", Username: "development", DisplayName: "Development Admin", RealmRoles: []string{"admin"}})
 			c.Next()
 			return
 		}
@@ -28,6 +30,7 @@ func APIKeyAuth(expectedToken string) gin.HandlerFunc {
 			return
 		}
 
+		auth.SetUser(c, auth.User{Subject: "api-key", Username: "api-key", DisplayName: "API Key Admin", RealmRoles: []string{"admin"}})
 		c.Next()
 	}
 }

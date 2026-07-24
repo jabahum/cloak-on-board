@@ -108,6 +108,7 @@ services:
       KEYCLOAK_INTERNAL_URL: http://keycloak:8080
       KEYCLOAK_BASE_URL: http://keycloak:8080
       KEYCLOAK_REALM: onboarder
+      KEYCLOAK_AUDIENCE: keycloak-onboarder-ui
       KEYCLOAK_ADMIN_CLIENT_ID: onboarder-admin
       KEYCLOAK_ADMIN_CLIENT_SECRET: onboarder-admin-secret
 

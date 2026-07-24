@@ -14,6 +14,13 @@ type JWKS struct {
 	Keys []JWK `json:"keys"`
 }
 
+func (p *JWKSProvider) Invalidate() {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	p.cached = JWKS{}
+	p.expiresAt = time.Time{}
+}
+
 type JWK struct {
 	Kid string `json:"kid"`
 	Kty string `json:"kty"`

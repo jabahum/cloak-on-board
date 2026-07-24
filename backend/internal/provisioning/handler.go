@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/jabahum/keycloak-onboarder/backend/internal/auth"
 	"github.com/jabahum/keycloak-onboarder/backend/internal/response"
 )
 
@@ -16,9 +17,8 @@ func NewHandler(service *Service) *Handler {
 }
 
 func (h *Handler) RegisterRoutes(rg *gin.RouterGroup) {
-	rg.GET("/jobs", h.ListJobs)
-	rg.GET("/jobs/:id", h.GetJobByID)
-	rg.POST("/jobs", h.CreateJob)
+	rg.GET("/jobs", auth.RequirePermission(auth.PermissionRead), h.ListJobs)
+	rg.GET("/jobs/:id", auth.RequirePermission(auth.PermissionRead), h.GetJobByID)
 }
 
 func (h *Handler) ListJobs(c *gin.Context) {

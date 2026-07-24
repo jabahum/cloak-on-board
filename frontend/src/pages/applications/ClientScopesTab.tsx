@@ -19,7 +19,7 @@ import type {
   ClientScopeAssignments,
 } from "../../types/application";
 
-export function ClientScopesTab({ applicationId }: { applicationId: string }) {
+export function ClientScopesTab({ applicationId, canManage }: { applicationId: string; canManage: boolean }) {
   const [scopes, setScopes] = useState<ClientScopeAssignments | null>(null);
   const [selected, setSelected] = useState("");
   const [scopeType, setScopeType] = useState<"default" | "optional">("default");
@@ -82,7 +82,7 @@ export function ClientScopesTab({ applicationId }: { applicationId: string }) {
         <InlineNotification kind="error" title="Client scopes" subtitle={error} />
       )}
 
-      <Tile>
+      {canManage && <Tile>
         <h4>Assign client scope</h4>
         <div className="inline-form">
           <Select
@@ -114,19 +114,21 @@ export function ClientScopesTab({ applicationId }: { applicationId: string }) {
         {(scopes?.available ?? []).length === 0 && (
           <p>All realm client scopes are assigned.</p>
         )}
-      </Tile>
+      </Tile>}
 
       <ScopeList
         title="Default scopes"
         scopes={scopes?.default ?? []}
         onRemove={(scope) => remove(scope, "default")}
         disabled={saving}
+        canManage={canManage}
       />
       <ScopeList
         title="Optional scopes"
         scopes={scopes?.optional ?? []}
         onRemove={(scope) => remove(scope, "optional")}
         disabled={saving}
+        canManage={canManage}
       />
     </div>
   );
@@ -137,11 +139,13 @@ function ScopeList({
   scopes,
   onRemove,
   disabled,
+  canManage,
 }: {
   title: string;
   scopes: ClientScope[];
   onRemove: (scope: ClientScope) => void;
   disabled: boolean;
+  canManage: boolean;
 }) {
   return (
     <Tile>
@@ -153,7 +157,7 @@ function ScopeList({
           {scopes.map((scope) => (
             <Tag
               key={scope.id}
-              filter
+              filter={canManage}
               disabled={disabled}
               onClose={() => onRemove(scope)}
             >

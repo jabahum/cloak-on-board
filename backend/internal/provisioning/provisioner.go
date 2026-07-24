@@ -44,6 +44,9 @@ func (p *Provisioner) ProvisionApplication(ctx context.Context, applicationID st
 	if err := p.jobService.MarkJobRunning(ctx, job.ID); err != nil {
 		return Job{}, err
 	}
+	if err := p.appService.UpdateStatus(ctx, applicationID, "provisioning"); err != nil {
+		return Job{}, err
+	}
 
 	if err := p.runProvisioning(ctx, job.ID, app); err != nil {
 		_ = p.jobService.MarkJobFailed(ctx, job.ID, err.Error())

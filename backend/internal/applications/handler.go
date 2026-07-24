@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/jabahum/keycloak-onboarder/backend/internal/auth"
 	"github.com/jabahum/keycloak-onboarder/backend/internal/keycloak"
 	"github.com/jabahum/keycloak-onboarder/backend/internal/response"
 )
@@ -31,21 +32,21 @@ type Handler struct {
 }
 
 func (h *Handler) RegisterRoutes(rg *gin.RouterGroup) {
-	rg.GET("/applications", h.List)
-	rg.POST("/applications", h.Create)
-	rg.POST("/applications/import", h.Import)
-	rg.GET("/applications/:id", h.GetByID)
-	rg.PUT("/applications/:id", h.Update)
-	rg.DELETE("/applications/:id", h.Delete)
-	rg.POST("/applications/:id/provision", h.Provision)
-	rg.GET("/keycloak/clients", h.ListKeycloakClients)
-	rg.GET("/applications/:id/client-scopes", h.ListClientScopes)
-	rg.PUT("/applications/:id/client-scopes/:scopeId", h.AssignClientScope)
-	rg.DELETE("/applications/:id/client-scopes/:scopeId", h.RemoveClientScope)
-	rg.GET("/applications/:id/protocol-mappers", h.ListProtocolMappers)
-	rg.POST("/applications/:id/protocol-mappers", h.CreateProtocolMapper)
-	rg.PUT("/applications/:id/protocol-mappers/:mapperId", h.UpdateProtocolMapper)
-	rg.DELETE("/applications/:id/protocol-mappers/:mapperId", h.DeleteProtocolMapper)
+	rg.GET("/applications", auth.RequirePermission(auth.PermissionRead), h.List)
+	rg.POST("/applications", auth.RequirePermission(auth.PermissionManageDrafts), h.Create)
+	rg.POST("/applications/import", auth.RequirePermission(auth.PermissionManageDrafts), h.Import)
+	rg.GET("/applications/:id", auth.RequirePermission(auth.PermissionRead), h.GetByID)
+	rg.PUT("/applications/:id", auth.RequirePermission(auth.PermissionManageDrafts), h.Update)
+	rg.DELETE("/applications/:id", auth.RequirePermission(auth.PermissionAdminClients), h.Delete)
+	rg.POST("/applications/:id/provision", auth.RequirePermission(auth.PermissionAdminClients), h.Provision)
+	rg.GET("/keycloak/clients", auth.RequirePermission(auth.PermissionManageDrafts), h.ListKeycloakClients)
+	rg.GET("/applications/:id/client-scopes", auth.RequirePermission(auth.PermissionRead), h.ListClientScopes)
+	rg.PUT("/applications/:id/client-scopes/:scopeId", auth.RequirePermission(auth.PermissionAdminClients), h.AssignClientScope)
+	rg.DELETE("/applications/:id/client-scopes/:scopeId", auth.RequirePermission(auth.PermissionAdminClients), h.RemoveClientScope)
+	rg.GET("/applications/:id/protocol-mappers", auth.RequirePermission(auth.PermissionRead), h.ListProtocolMappers)
+	rg.POST("/applications/:id/protocol-mappers", auth.RequirePermission(auth.PermissionAdminClients), h.CreateProtocolMapper)
+	rg.PUT("/applications/:id/protocol-mappers/:mapperId", auth.RequirePermission(auth.PermissionAdminClients), h.UpdateProtocolMapper)
+	rg.DELETE("/applications/:id/protocol-mappers/:mapperId", auth.RequirePermission(auth.PermissionAdminClients), h.DeleteProtocolMapper)
 }
 
 func NewHandler(service *Service) *Handler {
@@ -116,6 +117,20 @@ func (h *Handler) Update(c *gin.Context) {
 	var req UpdateApplicationRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		response.Error(c, http.StatusBadRequest, err.Error())
+		return
+	}
+	current, err := h.service.GetByID(c.Request.Context(), c.Param("id"))
+	if err != nil {
+		h.writeError(c, err)
+		return
+	}
+	user, _ := auth.GetUser(c)
+	if user.EffectiveRole() != "admin" && current.KeycloakClientUUID != "" {
+		response.Error(c, http.StatusForbidden, "linked client updates require an approval request")
+		return
+	}
+	if current.Status == "pending_approval" {
+		response.Error(c, http.StatusConflict, "application has a pending approval request")
 		return
 	}
 	app, err := h.manager.UpdateApplication(c.Request.Context(), c.Param("id"), req)

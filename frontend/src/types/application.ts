@@ -9,6 +9,7 @@ export type Application = {
   status: string;
   source: "created" | "imported";
   enabled: boolean;
+  config_version: number;
   redirect_uris?: string[];
   web_origins?: string[];
   roles?: string[];

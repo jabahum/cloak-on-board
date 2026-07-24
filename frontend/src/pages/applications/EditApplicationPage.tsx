@@ -18,10 +18,13 @@ import {
   initialWizardForm,
   type WizardForm,
 } from "./wizard/wizardTypes";
+import { useAuth } from "../../auth/AuthContext";
+import { submitApproval } from "../../api/approvals";
 
 export function EditApplicationPage() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { can } = useAuth();
   const [form, setForm] = useState<WizardForm>(initialWizardForm);
   const [enabled, setEnabled] = useState(true);
   const [linked, setLinked] = useState(false);
@@ -58,7 +61,7 @@ export function EditApplicationPage() {
     setSaving(true);
     setError("");
     try {
-      await updateApplication(id, {
+      const payload = {
         name: form.name,
         slug: form.slug,
         description: form.description,
@@ -69,7 +72,17 @@ export function EditApplicationPage() {
         web_origins: form.web_origins,
         roles: form.roles,
         enabled,
-      });
+      };
+      if (linked && !can("admin_clients")) {
+        await submitApproval(
+          id,
+          "update_keycloak_client",
+          payload,
+          "Update linked Keycloak client",
+        );
+      } else {
+        await updateApplication(id, payload);
+      }
       navigate(`/applications/${id}`);
     } catch (err) {
       setError(errorMessage(err));
@@ -106,7 +119,7 @@ export function EditApplicationPage() {
       <div className="wizard-actions">
         <Button kind="secondary" onClick={() => navigate(`/applications/${id}`)}>Cancel</Button>
         <Button disabled={saving || !form.name.trim() || !form.slug.trim()} onClick={submit}>
-          {saving ? "Saving..." : linked ? "Save and sync" : "Save"}
+          {saving ? "Saving..." : linked && !can("admin_clients") ? "Submit update for approval" : linked ? "Save and sync" : "Save"}
         </Button>
       </div>
     </>

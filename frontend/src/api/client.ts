@@ -9,7 +9,12 @@ export const api = axios.create({
 });
 
 api.interceptors.request.use(async (config) => {
-  await refreshToken();
+  try {
+    await refreshToken();
+  } catch {
+    window.location.assign("/");
+    throw new Error("Your session expired. Please sign in again.");
+  }
 
   const token = getAccessToken();
 

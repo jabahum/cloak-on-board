@@ -47,8 +47,10 @@ const emptyForm: MapperForm = {
 
 export function ProtocolMappersTab({
   applicationId,
+  canManage,
 }: {
   applicationId: string;
+  canManage: boolean;
 }) {
   const [mappers, setMappers] = useState<ProtocolMapper[]>([]);
   const [form, setForm] = useState<MapperForm>(emptyForm);
@@ -138,7 +140,7 @@ export function ProtocolMappersTab({
           subtitle={error}
         />
       )}
-      <div className="detail-actions">
+      {canManage && <div className="detail-actions">
         <Button
           onClick={() => {
             setForm(emptyForm);
@@ -147,7 +149,7 @@ export function ProtocolMappersTab({
         >
           Add mapper
         </Button>
-      </div>
+      </div>}
       <div className="phase-two-stack">
         {mappers.length === 0 ? (
           <Tile>No protocol mappers configured.</Tile>
@@ -169,7 +171,7 @@ export function ProtocolMappersTab({
                 <strong>Tokens:</strong>{" "}
                 {tokenDestinations(mapper.config).join(", ") || "none"}
               </p>
-              <div className="detail-actions">
+              {canManage && <div className="detail-actions">
                 <Button size="sm" kind="secondary" onClick={() => edit(mapper)}>
                   Edit
                 </Button>
@@ -180,7 +182,7 @@ export function ProtocolMappersTab({
                 >
                   Delete
                 </Button>
-              </div>
+              </div>}
             </Tile>
           ))
         )}

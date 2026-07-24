@@ -1,10 +1,30 @@
 package applications
 
 import (
+	"encoding/json"
 	"errors"
 	"reflect"
 	"testing"
 )
+
+func TestApplicationJSONDoesNotExposeClientSecret(t *testing.T) {
+	payload, err := json.Marshal(Application{KeycloakClientSecret: "sensitive"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if string(payload) == "" || containsText(string(payload), "sensitive") || containsText(string(payload), "keycloak_client_secret") {
+		t.Fatalf("application JSON exposed client secret: %s", payload)
+	}
+}
+
+func containsText(value, fragment string) bool {
+	for i := 0; i+len(fragment) <= len(value); i++ {
+		if value[i:i+len(fragment)] == fragment {
+			return true
+		}
+	}
+	return false
+}
 
 func TestValidateApplication(t *testing.T) {
 	if err := validateApplication("Portal", "portal", "frontend", "owner@example.org"); err != nil {

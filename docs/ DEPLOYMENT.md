@@ -166,9 +166,17 @@ SERVER_PORT=9000
 
 DATABASE_URL=postgres://user:password@postgres:5432/onboarder?sslmode=disable
 
+AUTH_MODE=keycloak
+
+KEYCLOAK_PUBLIC_URL=https://auth.example.com
+
+KEYCLOAK_INTERNAL_URL=http://keycloak:8080
+
 KEYCLOAK_BASE_URL=https://auth.example.com
 
-KEYCLOAK_REALM=MoH
+KEYCLOAK_REALM=onboarder
+
+KEYCLOAK_AUDIENCE=keycloak-onboarder-ui
 
 KEYCLOAK_ADMIN_CLIENT_ID=onboarder-admin
 
@@ -176,8 +184,10 @@ KEYCLOAK_ADMIN_CLIENT_SECRET=<secret>
 
 ALLOWED_ORIGINS=https://onboarder.example.com
 
-API_AUTH_TOKEN=<token>
 ```
+
+Production startup fails unless Keycloak authentication is fully configured.
+API-key mode is development/test only.
 
 ---
 
@@ -185,6 +195,9 @@ API_AUTH_TOKEN=<token>
 
 ```env
 VITE_API_BASE_URL=https://api.example.com/api/v1
+VITE_KEYCLOAK_URL=https://auth.example.com
+VITE_KEYCLOAK_REALM=onboarder
+VITE_KEYCLOAK_CLIENT_ID=keycloak-onboarder-ui
 ```
 
 ---

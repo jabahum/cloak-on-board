@@ -26,6 +26,7 @@ import {
 } from "../../api/applications";
 import type { Application } from "../../types/application";
 import axios from "axios";
+import { useAuth } from "../../auth/AuthContext";
 
 const headers = [
   { key: "name", header: "Name" },
@@ -37,6 +38,7 @@ const headers = [
 ];
 
 export function ApplicationsPage() {
+  const { can } = useAuth();
   const [apps, setApps] = useState<Application[]>([]);
   const [loading, setLoading] = useState(true);
   const [deleteTarget, setDeleteTarget] = useState<Application | null>(null);
@@ -108,17 +110,17 @@ export function ApplicationsPage() {
             <TableContainer>
               <TableToolbar>
                 <TableToolbarContent>
-                  <Button
+                  {can("manage_drafts") && <Button
                     as={Link}
                     kind="secondary"
                     to="/applications/import"
                     renderIcon={ImportExport}
                   >
                     Import from Keycloak
-                  </Button>
-                  <Button as={Link} to="/applications/new" renderIcon={Add}>
+                  </Button>}
+                  {can("manage_drafts") && <Button as={Link} to="/applications/new" renderIcon={Add}>
                     New application
-                  </Button>
+                  </Button>}
                 </TableToolbarContent>
               </TableToolbar>
 
@@ -151,22 +153,22 @@ export function ApplicationsPage() {
                             </Tag>
                           ) : cell.info.header === "actions" ? (
                             <div className="table-actions">
-                              <Button
+                              {can("manage_drafts") && <Button
                                 as={Link}
                                 size="sm"
                                 kind="ghost"
                                 to={`/applications/${cell.value}`}
                               >
                                 View
-                              </Button>
-                              <Button
+                              </Button>}
+                              {can("admin_clients") && <Button
                                 as={Link}
                                 size="sm"
                                 kind="ghost"
                                 to={`/applications/${cell.value}/edit`}
                               >
                                 Edit
-                              </Button>
+                              </Button>}
                               <Button
                                 size="sm"
                                 kind="danger--ghost"

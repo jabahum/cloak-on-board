@@ -2,17 +2,17 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";
 import App from "./App";
-import { initKeycloak } from "./auth/keycloak";
+import { AuthProvider } from "./auth/AuthContext";
 
 import "@carbon/styles/css/styles.css";
 import "./styles/app.scss";
 
-initKeycloak().then(() => {
-  ReactDOM.createRoot(document.getElementById("root")!).render(
-    <React.StrictMode>
+ReactDOM.createRoot(document.getElementById("root")!).render(
+  <React.StrictMode>
+    <AuthProvider>
       <BrowserRouter>
         <App />
       </BrowserRouter>
-    </React.StrictMode>,
-  );
-});
+    </AuthProvider>
+  </React.StrictMode>,
+);

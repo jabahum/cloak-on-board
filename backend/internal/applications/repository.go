@@ -22,7 +22,7 @@ func (r *Repository) List(ctx context.Context) ([]Application, error) {
 	rows, err := r.db.Query(ctx, `
 		SELECT id, name, slug, COALESCE(description, ''), app_type,
 		       COALESCE(owner_name, ''), COALESCE(owner_email, ''),
-		       status, source, enabled,
+		       status, source, enabled, config_version,
 		       COALESCE(keycloak_client_uuid, ''),
 		       COALESCE(keycloak_client_id, ''),
 		       provisioned_at, created_at, updated_at
@@ -50,6 +50,7 @@ func (r *Repository) List(ctx context.Context) ([]Application, error) {
 			&app.Status,
 			&app.Source,
 			&app.Enabled,
+			&app.ConfigVersion,
 			&app.KeycloakClientUUID,
 			&app.KeycloakClientID,
 			&app.ProvisionedAt,
@@ -71,7 +72,7 @@ func (r *Repository) GetByID(ctx context.Context, id string) (Application, error
 	err := r.db.QueryRow(ctx, `
 		SELECT id, name, slug, COALESCE(description, ''), app_type,
 		       COALESCE(owner_name, ''), COALESCE(owner_email, ''),
-		       status, source, enabled,
+		       status, source, enabled, config_version,
 		       COALESCE(keycloak_client_uuid, ''),
 		       COALESCE(keycloak_client_id, ''),
 		       COALESCE(keycloak_client_secret, ''),
@@ -89,6 +90,7 @@ func (r *Repository) GetByID(ctx context.Context, id string) (Application, error
 		&app.Status,
 		&app.Source,
 		&app.Enabled,
+		&app.ConfigVersion,
 		&app.KeycloakClientUUID,
 		&app.KeycloakClientID,
 		&app.KeycloakClientSecret,
@@ -127,6 +129,7 @@ func (r *Repository) Update(ctx context.Context, id string, req UpdateApplicatio
 		SET name = $2, slug = $3, description = $4, app_type = $5,
 		    owner_name = $6, owner_email = $7, enabled = $8,
 		    keycloak_client_id = CASE WHEN keycloak_client_uuid IS NOT NULL THEN $3 ELSE keycloak_client_id END,
+		    config_version = config_version + 1,
 		    updated_at = NOW()
 		WHERE id = $1
 	`, id, req.Name, req.Slug, req.Description, req.AppType, req.OwnerName, req.OwnerEmail, enabled)

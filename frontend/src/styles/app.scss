@@ -63,3 +63,42 @@
   flex-wrap: wrap;
   gap: 0.5rem;
 }
+
+.header-user {
+  align-self: center;
+  padding: 0 1rem;
+  color: #f4f4f4;
+  font-size: 0.875rem;
+}
+
+.notification-count {
+  position: absolute;
+  top: 0.25rem;
+  right: 0.25rem;
+  min-width: 1rem;
+  border-radius: 1rem;
+  background: #da1e28;
+  color: white;
+  font-size: 0.65rem;
+  text-align: center;
+}
+
+.auth-error {
+  max-width: 36rem;
+  margin: 6rem auto;
+  display: grid;
+  gap: 1rem;
+}
+
+.json-preview {
+  max-height: 24rem;
+  overflow: auto;
+  padding: 1rem;
+  background: #161616;
+  color: #f4f4f4;
+  white-space: pre-wrap;
+}
+
+.notification-unread {
+  border-left: 4px solid #0f62fe;
+}
