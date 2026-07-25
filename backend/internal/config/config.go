@@ -2,9 +2,11 @@ package config
 
 import (
 	"errors"
+	"fmt"
 	"os"
 	"strings"
 
+	"github.com/jabahum/keycloak-onboarder/backend/internal/credentials"
 	"github.com/joho/godotenv"
 )
 
@@ -28,6 +30,10 @@ type Config struct {
 	KeycloakAdminClientID     string
 	KeycloakAdminClientSecret string
 	KeycloakAudience          string
+
+	CredentialEncryptionKeys  string
+	SecretDeliveryTTLMinutes  int
+	DriftCheckIntervalMinutes int
 }
 
 func Load() (Config, error) {
@@ -52,6 +58,9 @@ func Load() (Config, error) {
 		KeycloakAdminClientID:     getEnv("KEYCLOAK_ADMIN_CLIENT_ID", ""),
 		KeycloakAdminClientSecret: getEnv("KEYCLOAK_ADMIN_CLIENT_SECRET", ""),
 		KeycloakAudience:          getEnv("KEYCLOAK_AUDIENCE", "keycloak-onboarder-ui"),
+		CredentialEncryptionKeys:  getEnv("CREDENTIAL_ENCRYPTION_KEYS", ""),
+		SecretDeliveryTTLMinutes:  getEnvInt("SECRET_DELIVERY_TTL_MINUTES", 10),
+		DriftCheckIntervalMinutes: getEnvIntAllowZero("DRIFT_CHECK_INTERVAL_MINUTES", 0),
 	}
 	if cfg.AuthMode == "keycloak" &&
 		(cfg.KeycloakPublicURL == "" || cfg.KeycloakInternalURL == "" || cfg.KeycloakRealm == "" || cfg.KeycloakAudience == "") {
@@ -59,6 +68,14 @@ func Load() (Config, error) {
 	}
 	if cfg.AppEnv == "production" && cfg.AuthMode != "keycloak" {
 		return Config{}, errors.New("production requires AUTH_MODE=keycloak")
+	}
+	if cfg.AppEnv == "production" && cfg.CredentialEncryptionKeys == "" {
+		return Config{}, errors.New("production requires CREDENTIAL_ENCRYPTION_KEYS")
+	}
+	if cfg.CredentialEncryptionKeys != "" {
+		if _, err := credentials.Parse(cfg.CredentialEncryptionKeys); err != nil {
+			return Config{}, fmt.Errorf("invalid CREDENTIAL_ENCRYPTION_KEYS: %w", err)
+		}
 	}
 	return cfg, nil
 }
@@ -70,4 +87,28 @@ func getEnv(key string, fallback string) string {
 	}
 
 	return value
+}
+
+func getEnvInt(key string, fallback int) int {
+	value := getEnv(key, "")
+	if value == "" {
+		return fallback
+	}
+	var parsed int
+	if _, err := fmt.Sscanf(value, "%d", &parsed); err != nil || parsed <= 0 {
+		return fallback
+	}
+	return parsed
+}
+
+func getEnvIntAllowZero(key string, fallback int) int {
+	value := getEnv(key, "")
+	if value == "" {
+		return fallback
+	}
+	var parsed int
+	if _, err := fmt.Sscanf(value, "%d", &parsed); err != nil || parsed < 0 {
+		return fallback
+	}
+	return parsed
 }

@@ -12,6 +12,8 @@ import { TemplatesPage } from "./pages/templates/TemplatesPage";
 import { ApprovalsPage } from "./pages/approvals/ApprovalsPage";
 import { AuditLogsPage } from "./pages/audit/AuditLogsPage";
 import { NotificationsPage } from "./pages/notifications/NotificationsPage";
+import { EnvironmentsPage } from "./pages/environments/EnvironmentsPage";
+import { DeploymentsPage } from "./pages/deployments/DeploymentsPage";
 import { RequirePermission } from "./auth/AuthContext";
 
 export function AppRoutes() {
@@ -29,6 +31,8 @@ export function AppRoutes() {
         <Route path="/jobs" element={<ProvisioningJobsPage />} />
         <Route path="/approvals" element={<ApprovalsPage />} />
         <Route path="/notifications" element={<NotificationsPage />} />
+        <Route path="/deployments" element={<DeploymentsPage />} />
+        <Route path="/environments" element={<RequirePermission permission="manage_environments"><EnvironmentsPage /></RequirePermission>} />
         <Route path="/audit-logs" element={<RequirePermission permission="view_audit"><AuditLogsPage /></RequirePermission>} />
         <Route path="/settings" element={<RequirePermission permission="manage_settings"><SettingsPage /></RequirePermission>} />
       </Route>

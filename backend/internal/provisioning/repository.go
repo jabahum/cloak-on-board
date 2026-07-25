@@ -18,6 +18,10 @@ func (r *Repository) ListJobs(ctx context.Context) ([]Job, error) {
 	rows, err := r.db.Query(ctx, `
 		SELECT id,
 		       COALESCE(application_id::text, ''),
+		       COALESCE(environment_id::text, ''),
+		       COALESCE(realm_connection_id::text, ''),
+		       COALESCE(deployment_id::text, ''),
+		       COALESCE(snapshot_id::text, ''),
 		       action,
 		       status,
 		       started_at,
@@ -41,6 +45,10 @@ func (r *Repository) ListJobs(ctx context.Context) ([]Job, error) {
 		if err := rows.Scan(
 			&job.ID,
 			&job.ApplicationID,
+			&job.EnvironmentID,
+			&job.RealmConnectionID,
+			&job.DeploymentID,
+			&job.SnapshotID,
 			&job.Action,
 			&job.Status,
 			&job.StartedAt,
@@ -64,6 +72,10 @@ func (r *Repository) GetJobByID(ctx context.Context, id string) (Job, error) {
 	err := r.db.QueryRow(ctx, `
 		SELECT id,
 		       COALESCE(application_id::text, ''),
+		       COALESCE(environment_id::text, ''),
+		       COALESCE(realm_connection_id::text, ''),
+		       COALESCE(deployment_id::text, ''),
+		       COALESCE(snapshot_id::text, ''),
 		       action,
 		       status,
 		       started_at,
@@ -76,6 +88,10 @@ func (r *Repository) GetJobByID(ctx context.Context, id string) (Job, error) {
 	`, id).Scan(
 		&job.ID,
 		&job.ApplicationID,
+		&job.EnvironmentID,
+		&job.RealmConnectionID,
+		&job.DeploymentID,
+		&job.SnapshotID,
 		&job.Action,
 		&job.Status,
 		&job.StartedAt,

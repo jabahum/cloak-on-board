@@ -102,3 +102,18 @@
 .notification-unread {
   border-left: 4px solid #0f62fe;
 }
+
+.delivery-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.delivery-form {
+  max-width: 48rem;
+}
+
+.connection-list {
+  margin-top: 1rem;
+}

@@ -56,12 +56,18 @@ services:
       APP_ENV: production
       APP_PORT: 9000
       DATABASE_URL: postgres://${POSTGRES_USER:-onboarder_user}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-onboarder}?sslmode=disable
+      AUTH_MODE: keycloak
+      KEYCLOAK_PUBLIC_URL: ${KEYCLOAK_PUBLIC_URL}
+      KEYCLOAK_INTERNAL_URL: ${KEYCLOAK_INTERNAL_URL}
       KEYCLOAK_BASE_URL: ${KEYCLOAK_BASE_URL}
       KEYCLOAK_REALM: ${KEYCLOAK_REALM}
+      KEYCLOAK_AUDIENCE: ${KEYCLOAK_AUDIENCE:-keycloak-onboarder-ui}
       KEYCLOAK_ADMIN_CLIENT_ID: ${KEYCLOAK_ADMIN_CLIENT_ID}
       KEYCLOAK_ADMIN_CLIENT_SECRET: ${KEYCLOAK_ADMIN_CLIENT_SECRET}
+      CREDENTIAL_ENCRYPTION_KEYS: ${CREDENTIAL_ENCRYPTION_KEYS}
+      SECRET_DELIVERY_TTL_MINUTES: ${SECRET_DELIVERY_TTL_MINUTES:-10}
+      DRIFT_CHECK_INTERVAL_MINUTES: ${DRIFT_CHECK_INTERVAL_MINUTES:-15}
       ALLOWED_ORIGINS: ${ALLOWED_ORIGINS}
-      API_AUTH_TOKEN: ${API_AUTH_TOKEN}
     expose:
       - "9000"
     networks:
@@ -79,7 +85,9 @@ services:
       dockerfile: Dockerfile.prod
       args:
         VITE_API_BASE_URL: ${VITE_API_BASE_URL}
-        VITE_API_AUTH_TOKEN: ${VITE_API_AUTH_TOKEN}
+        VITE_KEYCLOAK_URL: ${KEYCLOAK_PUBLIC_URL}
+        VITE_KEYCLOAK_REALM: ${KEYCLOAK_REALM}
+        VITE_KEYCLOAK_CLIENT_ID: ${KEYCLOAK_AUDIENCE:-keycloak-onboarder-ui}
     container_name: onboarder-ui-prod
     restart: unless-stopped
     depends_on:

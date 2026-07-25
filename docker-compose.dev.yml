@@ -111,6 +111,8 @@ services:
       KEYCLOAK_AUDIENCE: keycloak-onboarder-ui
       KEYCLOAK_ADMIN_CLIENT_ID: onboarder-admin
       KEYCLOAK_ADMIN_CLIENT_SECRET: onboarder-admin-secret
+      CREDENTIAL_ENCRYPTION_KEYS: v1:MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTIzNDU2Nzg5MDE=
+      SECRET_DELIVERY_TTL_MINUTES: 10
 
       ALLOWED_ORIGINS: http://localhost:3000,http://localhost:5173
       API_AUTH_TOKEN: A/HhdKZWaaPuL/JiouoKDrf4y0sXdK8u3bfdVQDGkZK2foubw90jEwwP/b3cOStl

@@ -9,13 +9,19 @@ import (
 type Permission string
 
 const (
-	PermissionRead           Permission = "read"
-	PermissionManageDrafts   Permission = "manage_drafts"
-	PermissionSubmitApproval Permission = "submit_approval"
-	PermissionAdminClients   Permission = "admin_clients"
-	PermissionManageSettings Permission = "manage_settings"
-	PermissionReviewApproval Permission = "review_approval"
-	PermissionViewAudit      Permission = "view_audit"
+	PermissionRead                   Permission = "read"
+	PermissionManageDrafts           Permission = "manage_drafts"
+	PermissionSubmitApproval         Permission = "submit_approval"
+	PermissionAdminClients           Permission = "admin_clients"
+	PermissionManageSettings         Permission = "manage_settings"
+	PermissionReviewApproval         Permission = "review_approval"
+	PermissionViewAudit              Permission = "view_audit"
+	PermissionManageEnvironments     Permission = "manage_environments"
+	PermissionManageRealmConnections Permission = "manage_realm_connections"
+	PermissionPromoteApplications    Permission = "promote_applications"
+	PermissionCheckDrift             Permission = "check_drift"
+	PermissionReconcileDrift         Permission = "reconcile_drift"
+	PermissionRotateSecrets          Permission = "rotate_secrets"
 )
 
 var rolePermissions = map[string]map[Permission]bool{
@@ -24,11 +30,15 @@ var rolePermissions = map[string]map[Permission]bool{
 	},
 	"manager": {
 		PermissionRead: true, PermissionManageDrafts: true, PermissionSubmitApproval: true,
+		PermissionPromoteApplications: true, PermissionCheckDrift: true,
 	},
 	"admin": {
 		PermissionRead: true, PermissionManageDrafts: true, PermissionSubmitApproval: true,
 		PermissionAdminClients: true, PermissionManageSettings: true,
 		PermissionReviewApproval: true, PermissionViewAudit: true,
+		PermissionManageEnvironments: true, PermissionManageRealmConnections: true,
+		PermissionPromoteApplications: true, PermissionCheckDrift: true,
+		PermissionReconcileDrift: true, PermissionRotateSecrets: true,
 	},
 }
 

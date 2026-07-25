@@ -19,7 +19,13 @@ export type Permission =
   | "admin_clients"
   | "manage_settings"
   | "review_approval"
-  | "view_audit";
+  | "view_audit"
+  | "manage_environments"
+  | "manage_realm_connections"
+  | "promote_applications"
+  | "check_drift"
+  | "reconcile_drift"
+  | "rotate_secrets";
 export type CurrentUser = {
   subject: string;
   username: string;
@@ -31,7 +37,7 @@ export type CurrentUser = {
 
 const permissions: Record<Role, Permission[]> = {
   viewer: ["read"],
-  manager: ["read", "manage_drafts", "submit_approval"],
+  manager: ["read", "manage_drafts", "submit_approval", "promote_applications", "check_drift"],
   admin: [
     "read",
     "manage_drafts",
@@ -40,6 +46,12 @@ const permissions: Record<Role, Permission[]> = {
     "manage_settings",
     "review_approval",
     "view_audit",
+    "manage_environments",
+    "manage_realm_connections",
+    "promote_applications",
+    "check_drift",
+    "reconcile_drift",
+    "rotate_secrets",
   ],
 };
 

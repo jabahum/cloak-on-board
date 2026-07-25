@@ -38,6 +38,40 @@ Instead of manually configuring Keycloak through the Admin Console, administrato
 - Web Origins
 - Client Secrets
 
+## Phase 4 delivery architecture
+
+The authentication realm is a control-plane dependency and is never selected
+as an implicit deployment target. `environments` define strict promotion
+order; `realm_connections` bind one managed realm to an environment;
+`application_deployments` hold the realm-specific client UUID and current
+snapshot.
+
+Snapshots are immutable canonical JSON documents. Only `redirect_uris`,
+`web_origins`, and `enabled` may be overridden per environment. Promotion
+copies a snapshot, never mutable application state, and requires the
+immediately preceding deployed environment. Protected environments use the
+existing approval system.
+
+Drift checks read the target client and compare only managed fields:
+identity, display metadata, client type/flows, enabled state, redirect URIs,
+web origins, and client roles. Lists are sorted and Keycloak defaults are
+normalized before hashing. Reconciliation reapplies the snapshot and performs
+a post-write verification.
+
+Realm credentials and temporary secret deliveries use AES-256-GCM with
+versioned keys. Connection IDs and delivery identity are authenticated as
+additional data. Rotation is a single-attempt mutation and delivery
+ciphertext is deleted atomically on first consumption.
+
+```text
+Authentication realm ──JWT──> API
+                              │
+Application ──> Snapshot ──> Deployment ──> Explicit realm connection
+                              │
+                              ├── Drift run/findings
+                              └── Approval ──> promotion/reconcile/rotation
+```
+
 ---
 
 # Design Principles

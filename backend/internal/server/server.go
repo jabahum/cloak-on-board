@@ -2,12 +2,16 @@ package server
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/jabahum/keycloak-onboarder/backend/internal/applications"
 	"github.com/jabahum/keycloak-onboarder/backend/internal/approvals"
 	"github.com/jabahum/keycloak-onboarder/backend/internal/config"
+	"github.com/jabahum/keycloak-onboarder/backend/internal/credentials"
+	"github.com/jabahum/keycloak-onboarder/backend/internal/delivery"
 	"github.com/jabahum/keycloak-onboarder/backend/internal/middleware"
 	"github.com/jabahum/keycloak-onboarder/backend/internal/notifications"
 	"github.com/jabahum/keycloak-onboarder/backend/internal/provisioning"
@@ -17,14 +21,16 @@ import (
 )
 
 type Server struct {
-	config config.Config
-	db     *pgxpool.Pool
-	router *gin.Engine
+	config   config.Config
+	db       *pgxpool.Pool
+	router   *gin.Engine
+	delivery *delivery.Service
 }
 
 type workflowExecutor struct {
 	provisioner *provisioning.Provisioner
 	manager     *provisioning.ClientManager
+	delivery    *delivery.Service
 }
 
 func (e workflowExecutor) Provision(ctx context.Context, id string) (string, error) {
@@ -38,6 +44,9 @@ func (e workflowExecutor) Update(ctx context.Context, id string, req application
 func (e workflowExecutor) Delete(ctx context.Context, id string, deleteKeycloak bool) error {
 	return e.manager.DeleteApplication(ctx, id, deleteKeycloak)
 }
+func (e workflowExecutor) ExecutePhaseFour(ctx context.Context, action, appID string, payload json.RawMessage, subject string) (string, error) {
+	return e.delivery.ExecuteApproved(ctx, action, appID, payload, subject)
+}
 
 func (s *Server) approvalService(n *notifications.Service) *approvals.Service {
 	appRepo := applications.NewRepository(s.db)
@@ -47,7 +56,7 @@ func (s *Server) approvalService(n *notifications.Service) *approvals.Service {
 	jobService := provisioning.NewService(provisioning.NewRepository(s.db))
 	provisioner := provisioning.NewProvisioner(appService, settingsService, jobService)
 	manager := provisioning.NewClientManager(appService, settingsService, jobService)
-	return approvals.NewService(s.db, appService, n, workflowExecutor{provisioner: provisioner, manager: manager})
+	return approvals.NewService(s.db, appService, n, workflowExecutor{provisioner: provisioner, manager: manager, delivery: s.delivery})
 }
 
 func New(cfg config.Config, db *pgxpool.Pool) *Server {
@@ -56,6 +65,10 @@ func New(cfg config.Config, db *pgxpool.Pool) *Server {
 		db:     db,
 		router: gin.New(),
 	}
+	ring, _ := credentials.Parse(cfg.CredentialEncryptionKeys)
+	appService := applications.NewService(applications.NewRepository(db))
+	notificationService := notifications.NewService(db)
+	s.delivery = delivery.NewService(db, appService, ring, notificationService, time.Duration(cfg.SecretDeliveryTTLMinutes)*time.Minute)
 
 	s.router.Use(middleware.RequestID())
 	s.router.Use(middleware.Recovery())
@@ -69,6 +82,10 @@ func New(cfg config.Config, db *pgxpool.Pool) *Server {
 
 func (s *Server) Run() error {
 	addr := fmt.Sprintf(":%s", s.config.AppPort)
+	go s.delivery.RunSecretExpiryScheduler(context.Background())
+	if s.config.DriftCheckIntervalMinutes > 0 {
+		go s.delivery.RunDriftScheduler(context.Background(), time.Duration(s.config.DriftCheckIntervalMinutes)*time.Minute, 4)
+	}
 	return s.router.Run(addr)
 }
 

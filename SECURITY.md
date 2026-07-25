@@ -58,6 +58,27 @@ security boundary.
 - Settings responses never include the Keycloak admin client secret.
 - Audit data recursively redacts secrets, passwords, tokens, and authorization headers.
 - Tokens and credentials must never be added to notifications or error messages.
+- Managed-realm administrator secrets are encrypted with AES-256-GCM. The
+  realm-connection UUID is authenticated as additional data.
+- `CREDENTIAL_ENCRYPTION_KEYS` is a comma-separated, newest-first keyring in
+  `version:base64` form. Each decoded key must be exactly 32 bytes. Retain old
+  versions until every stored credential has been re-encrypted.
+- Production refuses to start without encryption keys. Legacy settings
+  credentials are migrated once and their plaintext column is cleared.
+- Rotated client secrets are encrypted at rest, expire after
+  `SECRET_DELIVERY_TTL_MINUTES`, are recipient-bound, and are atomically
+  consumed. The ciphertext is deleted when consumed.
+- Secret-delivery responses use `Cache-Control: no-store` and `Pragma:
+  no-cache`. Expired or consumed deliveries return `410`.
+- Rotation is never automatically retried because a lost successful response
+  would make a second rotation unsafe.
+
+## Realm separation
+
+The realm configured by `KEYCLOAK_REALM` authenticates cloak-on-board users
+only. Every managed Keycloak operation resolves an enabled realm connection
+from its deployment; an application-level UUID is never reused across realms.
+Use distinct least-privilege service-account clients for every managed realm.
 
 The users and credentials in the development realm import are examples for
 local development only. Production users must be provisioned separately and

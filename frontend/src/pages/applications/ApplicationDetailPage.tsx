@@ -27,6 +27,7 @@ import { ClientScopesTab } from "./ClientScopesTab";
 import { ProtocolMappersTab } from "./ProtocolMappersTab";
 import { useAuth } from "../../auth/AuthContext";
 import { submitApproval } from "../../api/approvals";
+import { DeploymentsTab } from "./DeploymentsTab";
 
 export function ApplicationDetailPage() {
   const { id } = useParams();
@@ -178,6 +179,7 @@ export function ApplicationDetailPage() {
           <Tab>Protocol mappers</Tab>
           <Tab>Secrets</Tab>
           <Tab>Provisioning</Tab>
+          <Tab>Deployments</Tab>
         </TabList>
 
         <TabPanels>
@@ -214,6 +216,10 @@ export function ApplicationDetailPage() {
 
           <TabPanel>
             <ProvisioningTab job={job} />
+          </TabPanel>
+
+          <TabPanel>
+            <DeploymentsTab applicationId={app.id} />
           </TabPanel>
         </TabPanels>
       </Tabs>
@@ -407,7 +413,10 @@ function SecretsTab({ app }: { app: Application }) {
           <code>{app.keycloak_client_secret}</code>
         </p>
       ) : (
-        <p>This application does not have a stored client secret.</p>
+        <p>
+          Secrets are realm-specific. Request rotation from the Deployments tab;
+          the requester receives an expiring one-time delivery.
+        </p>
       )}
     </Tile>
   );

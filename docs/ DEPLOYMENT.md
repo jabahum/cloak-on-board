@@ -182,12 +182,31 @@ KEYCLOAK_ADMIN_CLIENT_ID=onboarder-admin
 
 KEYCLOAK_ADMIN_CLIENT_SECRET=<secret>
 
+CREDENTIAL_ENCRYPTION_KEYS=v2:<base64-32-byte-key>,v1:<previous-key>
+
+SECRET_DELIVERY_TTL_MINUTES=10
+
+DRIFT_CHECK_INTERVAL_MINUTES=15
+
 ALLOWED_ORIGINS=https://onboarder.example.com
 
 ```
 
 Production startup fails unless Keycloak authentication is fully configured.
 API-key mode is development/test only.
+
+Production also fails without `CREDENTIAL_ENCRYPTION_KEYS`. Put the newest key
+first and retain previous versions while rotating encryption material. Do not
+reuse the authentication-realm administrative client for managed realms.
+
+For each target realm, create a confidential service-account client with
+`realm-management/manage-clients`, `view-clients`, `query-clients`, and
+`view-realm`. Add it through the realm-connections API or admin UI. The secret
+is write-only and encrypted immediately.
+
+Promotion order is controlled by the database. Production-like environments
+must be marked protected so deployment, rollback, reconciliation, and secret
+rotation use an approval with a different reviewer.
 
 ---
 

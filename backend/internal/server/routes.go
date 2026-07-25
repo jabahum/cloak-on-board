@@ -7,6 +7,7 @@ import (
 	"github.com/jabahum/keycloak-onboarder/backend/internal/approvals"
 	"github.com/jabahum/keycloak-onboarder/backend/internal/audit"
 	"github.com/jabahum/keycloak-onboarder/backend/internal/auth"
+	"github.com/jabahum/keycloak-onboarder/backend/internal/delivery"
 	"github.com/jabahum/keycloak-onboarder/backend/internal/middleware"
 	"github.com/jabahum/keycloak-onboarder/backend/internal/notifications"
 	"github.com/jabahum/keycloak-onboarder/backend/internal/response"
@@ -58,6 +59,7 @@ func (s *Server) registerRoutes() {
 	s.templateHandler().RegisterRoutes(protected)
 	s.settingsHandler().RegisterRoutes(protected)
 	s.provisioningHandler().RegisterRoutes(protected)
+	delivery.NewHandler(s.delivery).RegisterRoutes(protected)
 
 	notificationHandler := notifications.NewHandler(notificationService)
 	protected.GET("/notifications", auth.RequirePermission(auth.PermissionRead), notificationHandler.List)

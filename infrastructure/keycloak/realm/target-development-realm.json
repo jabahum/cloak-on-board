@@ -1,0 +1,30 @@
+{
+  "realm": "target-development",
+  "enabled": true,
+  "displayName": "Managed Development",
+  "registrationAllowed": false,
+  "clients": [
+    {
+      "clientId": "onboarder-target-admin",
+      "name": "Onboarder target administrator",
+      "enabled": true,
+      "protocol": "openid-connect",
+      "publicClient": false,
+      "clientAuthenticatorType": "client-secret",
+      "secret": "target-admin-secret",
+      "serviceAccountsEnabled": true,
+      "standardFlowEnabled": false,
+      "directAccessGrantsEnabled": false
+    }
+  ],
+  "users": [
+    {
+      "username": "service-account-onboarder-target-admin",
+      "enabled": true,
+      "serviceAccountClientId": "onboarder-target-admin",
+      "clientRoles": {
+        "realm-management": ["manage-clients", "view-clients", "query-clients", "view-realm"]
+      }
+    }
+  ]
+}

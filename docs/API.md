@@ -32,15 +32,14 @@ Content-Type: application/json
 
 # Authentication
 
-Currently, the API supports optional bearer token authentication.
+The API requires a Keycloak bearer token in production.
 
 ```
 Authorization: Bearer <token>
 ```
 
-When `API_AUTH_TOKEN` is not configured, authentication is disabled for development.
-
-Future versions will support Keycloak-issued JWT access tokens.
+Development may use the explicit API-key mode. Authentication is never
+implicitly disabled.
 
 ---
 
@@ -74,10 +73,67 @@ Future versions will support Keycloak-issued JWT access tokens.
 | 204  | No Content            |
 | 400  | Bad Request           |
 | 401  | Unauthorized          |
+| 403  | Forbidden             |
 | 404  | Not Found             |
 | 409  | Conflict              |
 | 422  | Validation Error      |
 | 500  | Internal Server Error |
+| 502  | Upstream failure      |
+| 503  | Target unavailable    |
+| 410  | Delivery gone         |
+
+Every error response includes `request_id`.
+
+---
+
+# Phase 4 delivery endpoints
+
+The committed OpenAPI 3.1 source at `openapi/openapi.yaml` is authoritative.
+
+```text
+GET    /environments
+POST   /environments
+GET    /realm-connections
+POST   /realm-connections
+POST   /realm-connections/{id}/test
+DELETE /realm-connections/{id}
+
+GET    /applications/{id}/snapshots
+POST   /applications/{id}/snapshots
+GET    /applications/{id}/deployments
+POST   /applications/{id}/deployments
+GET    /deployments
+POST   /applications/{id}/promotions
+POST   /deployments/{id}/rollback
+
+POST   /deployments/{id}/drift-checks
+GET    /drift-runs?deployment_id={id}
+POST   /deployments/{id}/reconcile
+POST   /deployments/{id}/rotate-secret
+POST   /secret-deliveries/{id}/consume
+```
+
+Protected mutations are submitted through the existing endpoint:
+
+```json
+POST /applications/{id}/approval-requests
+{
+  "action": "promote_application",
+  "payload": {
+    "source_deployment_id": "uuid",
+    "destination_environment_id": "uuid",
+    "realm_connection_id": "uuid"
+  },
+  "summary": "Promote the tested snapshot"
+}
+```
+
+Supported Phase 4 actions are `deploy_application`,
+`promote_application`, `rollback_deployment`, `reconcile_drift`, and
+`rotate_client_secret`. Requesters cannot approve their own requests.
+
+Realm credentials are write-only. A rotated secret is returned only by its
+recipient's one-time consume call; a second call returns `410`.
 
 ---
 

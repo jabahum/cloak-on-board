@@ -3,15 +3,19 @@ package provisioning
 import "time"
 
 type Job struct {
-	ID            string     `json:"id"`
-	ApplicationID string     `json:"application_id"`
-	Action        string     `json:"action"`
-	Status        string     `json:"status"`
-	StartedAt     *time.Time `json:"started_at"`
-	CompletedAt   *time.Time `json:"completed_at"`
-	ErrorMessage  string     `json:"error_message"`
-	CreatedAt     time.Time  `json:"created_at"`
-	UpdatedAt     time.Time  `json:"updated_at"`
+	ID                string     `json:"id"`
+	ApplicationID     string     `json:"application_id"`
+	EnvironmentID     string     `json:"environment_id,omitempty"`
+	RealmConnectionID string     `json:"realm_connection_id,omitempty"`
+	DeploymentID      string     `json:"deployment_id,omitempty"`
+	SnapshotID        string     `json:"snapshot_id,omitempty"`
+	Action            string     `json:"action"`
+	Status            string     `json:"status"`
+	StartedAt         *time.Time `json:"started_at"`
+	CompletedAt       *time.Time `json:"completed_at"`
+	ErrorMessage      string     `json:"error_message"`
+	CreatedAt         time.Time  `json:"created_at"`
+	UpdatedAt         time.Time  `json:"updated_at"`
 
 	Steps []JobStep `json:"steps,omitempty"`
 }

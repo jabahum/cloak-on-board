@@ -1,0 +1,370 @@
+openapi: 3.1.0
+info:
+  title: cloak-on-board API
+  version: 0.4.0
+  description: API for application onboarding, controlled promotion, drift detection, and secret rotation.
+  license:
+    name: MIT
+    identifier: MIT
+servers:
+  - url: http://localhost:9000/api/v1
+security:
+  - bearerAuth: []
+paths:
+  /health:
+    get:
+      summary: Check API health
+      security: []
+      operationId: health
+      responses:
+        "200": { description: Healthy }
+  /applications:
+    get:
+      summary: List applications
+      operationId: listApplications
+      responses:
+        "200":
+          description: Applications
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ApplicationListResponse" }
+    post:
+      summary: Create an application
+      operationId: createApplication
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { type: object, additionalProperties: true }
+      responses:
+        "201": { description: Created }
+  /applications/{applicationId}:
+    parameters:
+      - $ref: "#/components/parameters/ApplicationId"
+    get:
+      summary: Get an application
+      operationId: getApplication
+      responses:
+        "200": { description: Application }
+    put:
+      summary: Update an application
+      operationId: updateApplication
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { type: object, additionalProperties: true }
+      responses:
+        "200": { description: Updated }
+    delete:
+      summary: Delete an application
+      operationId: deleteApplication
+      responses:
+        "204": { description: Deleted }
+  /environments:
+    get:
+      summary: List ordered environments
+      operationId: listEnvironments
+      responses:
+        "200": { description: Ordered environments }
+    post:
+      summary: Create an environment
+      operationId: createEnvironment
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/EnvironmentInput" }
+      responses:
+        "201": { description: Created }
+  /environments/{environmentId}:
+    parameters:
+      - name: environmentId
+        in: path
+        required: true
+        schema: { type: string, format: uuid }
+    put:
+      summary: Update an environment
+      operationId: updateEnvironment
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/EnvironmentInput" }
+      responses:
+        "200": { description: Updated }
+    delete:
+      summary: Delete an unused environment
+      operationId: deleteEnvironment
+      responses:
+        "204": { description: Deleted }
+  /realm-connections:
+    get:
+      summary: List realm connections
+      operationId: listRealmConnections
+      responses:
+        "200": { description: Safe realm-connection metadata; credentials are never returned }
+    post:
+      summary: Create an encrypted realm connection
+      operationId: createRealmConnection
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/RealmConnectionInput" }
+      responses:
+        "201": { description: Created }
+  /realm-connections/{connectionId}/test:
+    post:
+      summary: Test a realm connection
+      operationId: testRealmConnection
+      parameters:
+        - $ref: "#/components/parameters/ConnectionId"
+      responses:
+        "200": { description: Connection tested }
+        "503": { $ref: "#/components/responses/Error" }
+  /realm-connections/{connectionId}:
+    parameters:
+      - $ref: "#/components/parameters/ConnectionId"
+    put:
+      summary: Update a realm connection
+      operationId: updateRealmConnection
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/RealmConnectionInput" }
+      responses:
+        "200": { description: Updated }
+    delete:
+      summary: Disable an unused realm connection
+      operationId: disableRealmConnection
+      responses:
+        "204": { description: Disabled }
+  /applications/{applicationId}/snapshots:
+    parameters:
+      - $ref: "#/components/parameters/ApplicationId"
+    get:
+      summary: List immutable snapshots
+      operationId: listSnapshots
+      responses:
+        "200": { description: Immutable snapshots }
+    post:
+      summary: Create an immutable snapshot
+      operationId: createSnapshot
+      responses:
+        "201": { description: Snapshot created }
+  /applications/{applicationId}/deployments:
+    parameters:
+      - $ref: "#/components/parameters/ApplicationId"
+    get:
+      summary: List application deployments
+      operationId: listApplicationDeployments
+      responses:
+        "200": { description: Deployments }
+    post:
+      summary: Deploy an application snapshot
+      operationId: deployApplication
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/DeploymentInput" }
+      responses:
+        "201": { description: Deployed }
+        "403": { $ref: "#/components/responses/Error" }
+  /applications/{applicationId}/promotions:
+    post:
+      summary: Promote a snapshot
+      operationId: promoteApplication
+      parameters:
+        - $ref: "#/components/parameters/ApplicationId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/PromotionInput" }
+      responses:
+        "201": { description: Promoted }
+        "409": { $ref: "#/components/responses/Error" }
+  /deployments:
+    get:
+      summary: List deployment matrix
+      operationId: listDeployments
+      parameters:
+        - name: application_id
+          in: query
+          schema: { type: string, format: uuid }
+      responses:
+        "200": { description: Deployment matrix }
+  /deployments/{deploymentId}/drift-checks:
+    post:
+      summary: Check configuration drift
+      operationId: checkConfigurationDrift
+      parameters:
+        - $ref: "#/components/parameters/DeploymentId"
+      responses:
+        "201": { description: Drift run }
+  /drift-runs:
+    get:
+      summary: List drift runs
+      operationId: listDriftRuns
+      parameters:
+        - name: deployment_id
+          in: query
+          schema: { type: string, format: uuid }
+      responses:
+        "200": { description: Drift history }
+  /applications/{applicationId}/approval-requests:
+    post:
+      summary: Submit an approval request
+      operationId: submitApproval
+      parameters:
+        - $ref: "#/components/parameters/ApplicationId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/ApprovalInput" }
+      responses:
+        "201": { description: Approval submitted }
+  /approval-requests:
+    get:
+      summary: List approval requests
+      operationId: listApprovals
+      responses:
+        "200": { description: Approval requests }
+  /jobs:
+    get:
+      summary: List workflow jobs
+      operationId: listJobs
+      responses:
+        "200": { description: Jobs }
+  /notifications:
+    get:
+      summary: List current user notifications
+      operationId: listNotifications
+      responses:
+        "200": { description: Notifications for the current user }
+  /audit-logs:
+    get:
+      summary: List authorized audit events
+      operationId: listAuditLogs
+      responses:
+        "200": { description: Authorized audit events }
+  /secret-deliveries/{deliveryId}/consume:
+    post:
+      summary: Consume a one-time secret delivery
+      operationId: consumeSecretDelivery
+      parameters:
+        - name: deliveryId
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        "200":
+          description: Secret returned exactly once
+          headers:
+            Cache-Control:
+              schema: { type: string, const: "no-store, max-age=0" }
+        "410": { $ref: "#/components/responses/Error" }
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  parameters:
+    ApplicationId:
+      name: applicationId
+      in: path
+      required: true
+      schema: { type: string, format: uuid }
+    ConnectionId:
+      name: connectionId
+      in: path
+      required: true
+      schema: { type: string, format: uuid }
+    DeploymentId:
+      name: deploymentId
+      in: path
+      required: true
+      schema: { type: string, format: uuid }
+  responses:
+    Error:
+      description: Error with request correlation ID
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Error" }
+  schemas:
+    Error:
+      type: object
+      required: [error, request_id]
+      properties:
+        error: { type: string }
+        request_id: { type: string }
+    Application:
+      type: object
+      required: [id, name, slug, status]
+      properties:
+        id: { type: string, format: uuid }
+        name: { type: string }
+        slug: { type: string }
+        status: { type: string }
+      additionalProperties: true
+    ApplicationListResponse:
+      type: object
+      required: [data]
+      properties:
+        data:
+          type: array
+          items: { $ref: "#/components/schemas/Application" }
+    EnvironmentInput:
+      type: object
+      required: [name, slug, promotion_order]
+      properties:
+        name: { type: string }
+        slug: { type: string }
+        promotion_order: { type: integer, minimum: 1 }
+        protected: { type: boolean, default: false }
+    RealmConnectionInput:
+      type: object
+      required: [environment_id, name, base_url, realm, admin_client_id, admin_client_secret]
+      properties:
+        environment_id: { type: string, format: uuid }
+        name: { type: string }
+        base_url: { type: string, format: uri }
+        realm: { type: string }
+        admin_client_id: { type: string }
+        admin_client_secret: { type: string, writeOnly: true }
+    DeploymentInput:
+      type: object
+      required: [environment_id, realm_connection_id]
+      properties:
+        environment_id: { type: string, format: uuid }
+        realm_connection_id: { type: string, format: uuid }
+        snapshot_id: { type: string, format: uuid }
+        overrides:
+          type: object
+          properties:
+            redirect_uris: { type: array, items: { type: string } }
+            web_origins: { type: array, items: { type: string } }
+            enabled: { type: boolean }
+          additionalProperties: false
+    PromotionInput:
+      allOf:
+        - $ref: "#/components/schemas/DeploymentInput"
+        - type: object
+          required: [source_deployment_id, destination_environment_id]
+          properties:
+            source_deployment_id: { type: string, format: uuid }
+            destination_environment_id: { type: string, format: uuid }
+    ApprovalInput:
+      type: object
+      required: [action, payload]
+      properties:
+        action:
+          type: string
+          enum: [provision_application, update_keycloak_client, delete_keycloak_client, deploy_application, promote_application, rollback_deployment, reconcile_drift, rotate_client_secret]
+        payload: { type: object, additionalProperties: true }
+        summary: { type: string }

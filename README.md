@@ -68,6 +68,16 @@ Every provisioning operation creates a job that tracks:
 - Append-only audit history
 - Durable per-user in-app notifications
 
+## Delivery Platform
+
+- Ordered development, staging, and protected production environments
+- Multiple managed Keycloak realms, independent from the authentication realm
+- Immutable application snapshots and controlled environment overrides
+- Approval-backed promotion, rollback, drift reconciliation, and secret rotation
+- Read-only configuration drift checks with optional scheduled execution
+- Encrypted realm credentials and expiring one-time secret delivery
+- OpenAPI 3.1 contract and the `@cloak-on-board/sdk` TypeScript client
+
 ## Settings
 
 Configure the Keycloak connection without modifying application code.
@@ -121,6 +131,10 @@ keycloak-onboarder/
 │   ├── README.md
 │   ├── src/
 │   └── Dockerfile
+├── openapi/
+│   └── openapi.yaml
+├── sdk/
+│   └── typescript/
 │
 ├── docs/
 │   ├── API.md
@@ -293,6 +307,22 @@ Update Application Status
         ▼
 Provision Complete
 ```
+
+Phase 4 deployment flow:
+
+```text
+Application → Immutable snapshot → Development realm → Staging realm
+                                                    → Approval → Production realm
+Deployment → Read-only drift check → Approval → Reconciliation
+Deployment → Rotation approval → Encrypted delivery → One-time consumption
+```
+
+`KEYCLOAK_REALM` always identifies the authentication realm. Managed targets
+are stored as realm connections and selected explicitly for every operation;
+their client UUIDs live on deployment records, not application records.
+
+See [the OpenAPI contract](openapi/openapi.yaml) and
+[the TypeScript SDK](sdk/typescript/README.md).
 
 ---
 

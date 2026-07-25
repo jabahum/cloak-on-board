@@ -66,6 +66,8 @@ export function AppLayout() {
           <SideNavLink as={NavLink} to="/jobs">
             Provisioning Jobs
           </SideNavLink>
+          <SideNavLink as={NavLink} to="/deployments">Deployments</SideNavLink>
+          {can("manage_environments") && <SideNavLink as={NavLink} to="/environments">Environments</SideNavLink>}
           <SideNavLink as={NavLink} to="/approvals">Approvals</SideNavLink>
           <SideNavLink as={NavLink} to="/notifications">Notifications</SideNavLink>
           {can("view_audit") && <SideNavLink as={NavLink} to="/audit-logs">Audit Log</SideNavLink>}

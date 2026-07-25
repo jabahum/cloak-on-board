@@ -248,6 +248,40 @@ The realm import includes development-only admin, manager, and viewer examples.
 Assign production users through the Administrators, Managers, or Viewers group;
 never reuse the development credentials.
 
+The same import directory also contains `target-development`,
+`target-staging`, and `target-production`. These are disposable managed realms;
+they do not authenticate users. Register each under **Environments & realms**
+with `onboarder-target-admin` and the development-only secret documented in
+`infrastructure/keycloak/realm/README.md`.
+
+Phase 4 configuration:
+
+```text
+CREDENTIAL_ENCRYPTION_KEYS=v1:<base64 encoded 32-byte key>
+SECRET_DELIVERY_TTL_MINUTES=10
+DRIFT_CHECK_INTERVAL_MINUTES=0
+```
+
+Set the drift interval to zero to disable the scheduler. Scheduled checks use
+a PostgreSQL advisory lock and bounded concurrency.
+
+SDK checks:
+
+```bash
+cd sdk/typescript
+npm install
+npm run typecheck
+npm test
+npm run build
+```
+
+The SDK is maintained against `openapi/openapi.yaml`. It is currently
+handwritten, so there are no generated artifacts to regenerate.
+
+Migration 008 can be rolled back with `migrate down 1`. Rollback removes
+Phase 4 deployments, snapshots, findings, and deliveries; back up the database
+before performing it outside a disposable environment.
+
 ---
 
 # Coding Standards
