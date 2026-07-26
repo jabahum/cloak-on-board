@@ -356,49 +356,27 @@ PUT /api/v1/settings
 ## Provisioning Jobs
 
 ```
-GET  /api/v1/jobs
-GET  /api/v1/jobs/{id}
-POST /api/v1/jobs
+GET /api/v1/jobs
+GET /api/v1/jobs/{id}
 ```
 
 ---
 
-# MVP Roadmap
+# Roadmap Status
 
-## Completed
+The MVP/Foundation and Phases 2–3 are complete. Phase 4 is implemented with
+documented follow-ups. Phase 5 has not started.
 
-- Project setup
-- Docker environment
-- Backend API
-- React frontend
-- Application management
-- Templates
-- Settings
-- Provisioning jobs
-- Keycloak Admin client
-- Client provisioning
-- Client roles
-- Protocol mappers
-- Client secret retrieval
-- Middleware
-  - Logger
-  - Recovery
-  - Request ID
-  - CORS
-  - API Authentication
+| Release | Status |
+| --- | --- |
+| Phase 1 — MVP/Foundation | Complete |
+| Phase 2 — Client Lifecycle | Complete |
+| Phase 3 — Security and Governance | Complete |
+| Phase 4 — Delivery Platform | Implemented with follow-ups |
+| Phase 5 — Automation Ecosystem | Not started |
 
-## Planned
-
-- Automatic database migrations
-- Client scope management
-- Existing client import
-- Secret rotation
-- Configuration drift detection
-- Multi-environment support
-- Multi-realm support
-- Approval workflows
-- Audit logging
-- Developer Portal
+The detailed, authoritative checklist of implemented, partial, pending, and
+unassigned work is maintained in **[ROADMAP.md](ROADMAP.md)**.
 
 ---
 
@@ -406,23 +384,11 @@ POST /api/v1/jobs
 
 The MVP is the foundation of a complete **Keycloak Application Lifecycle Management Platform**.
 
-Future capabilities include:
-
-- Environment promotion
-- Approval workflows
-- Configuration synchronization
-- Secret rotation
-- Application registry
-- Audit logging
-- Role templates
-- Group management
-- Health monitoring
-- Developer portal
-- Configuration export
-- Documentation generation
-- Multi-realm administration
-- Multi-tenant support
-- Identity governance
+The next committed release is Phase 5: plugin marketplace, Terraform export,
+a Kubernetes operator, GitOps integration, and CI/CD templates. Additional
+ideas such as a developer portal, custom-template authoring, external secret
+stores, group management, multi-tenancy, and identity governance remain in the
+unassigned backlog in **[ROADMAP.md](ROADMAP.md)**.
 
 ---
 

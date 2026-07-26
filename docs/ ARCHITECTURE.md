@@ -636,14 +636,16 @@ The platform is designed for future expansion.
 
 Planned modules
 
-- Notification Service
-- Approval Workflow
-- Secret Rotation
-- Configuration Drift Detection
-- Audit Logs
-- Multi-Realm Support
-- Multi-Environment Promotion
-- Plugin SDK
+- Plugin marketplace
+- Terraform export
+- Kubernetes operator
+- GitOps integration
+- CI/CD templates
+
+Notifications, approvals, secret rotation, drift detection, audit logs,
+multi-realm support, multi-environment promotion, OpenAPI, and the TypeScript
+SDK are implemented in the current modular monolith. See `ROADMAP.md` for the
+authoritative status and unassigned backlog.
 
 ---
 

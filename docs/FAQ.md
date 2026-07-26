@@ -14,13 +14,15 @@ No. It uses the Keycloak Admin REST API and complements Keycloak.
 
 ## Can I import existing clients?
 
-Not yet. This is planned for a future release.
+Yes. Phase 2 added Keycloak client discovery and import, including core client
+configuration and client roles.
 
 ---
 
 ## Can multiple realms be managed?
 
-Not in the MVP. Multi-realm support is on the roadmap.
+Yes. Phase 4 added explicit environment-scoped realm connections. The
+`onboarder` authentication realm remains separate from managed target realms.
 
 ---
 
@@ -38,16 +40,28 @@ Yes. Templates can be managed through the platform and extended over time.
 
 ## Is authentication required?
 
-Authentication is optional in the MVP. Future releases will integrate with Keycloak using JWTs and RBAC.
+Production requires Keycloak JWT authentication. Development may explicitly
+use API-key mode. Viewer, manager, and administrator roles are enforced by the
+backend.
 
 ---
 
 ## Where are client secrets stored?
 
-Client secrets are stored in the platform database after provisioning confidential clients. In production, you should consider integrating with a dedicated secrets management solution.
+Legacy provisioning data remains response-hidden. Phase 4 rotated secrets use
+encrypted, recipient-bound, expiring one-time deliveries; ciphertext is
+deleted after consumption or expiry. External secret-manager integration is
+still in the unassigned backlog.
 
 ---
 
 ## Can I use this in production?
 
-The project is designed with production in mind, but you should review the deployment guide and security recommendations before deploying in a production environment.
+The project includes production authentication, encrypted managed-realm
+credentials, approvals, audit logs, and production container configuration.
+Review the deployment and security guides, provide production encryption keys,
+use least-privilege realm service accounts, and perform your organization’s
+own operational and security review.
+
+For current and planned scope, see the authoritative
+[product roadmap](../ROADMAP.md).
